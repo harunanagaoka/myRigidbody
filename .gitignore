@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+HuGDK/Link
+HuGDK/HuXDev12/新規 テキスト ドキュメント.txt
+HuGDK/HuXDev12/x64
+HuGDK/HuXDev12/packages
+HuGDK/HuXDev12/DirectX12AffinityLayer
+HuGDK/HuXDev12/DirectXTK12
+HuGDK/HuXDev12/DirectXTK9
+HuGDK/HuXDev12/MainProject/x64
+HuGDK/HuXDev12/.vs
