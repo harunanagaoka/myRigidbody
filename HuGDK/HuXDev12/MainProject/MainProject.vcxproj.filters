@@ -99,7 +99,7 @@
     <ClInclude Include="Classes\OriginalGeometry.h">
       <Filter>Classes</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\Rigidbody.h">
+    <ClInclude Include="Classes\RigidbodyOld.h">
       <Filter>Classes</Filter>
     </ClInclude>
     <ClInclude Include="Classes\ObjManager.h">
@@ -116,6 +116,9 @@
     </ClInclude>
     <ClInclude Include="Classes\CreateResources\EffectManager.h">
       <Filter>Classes\CreateResources</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Transform.h">
+      <Filter>Classes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -152,7 +155,7 @@
     <ClCompile Include="Classes\OriginalGeometry.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\Rigidbody.cpp">
+    <ClCompile Include="Classes\RigidbodyOld.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
     <ClCompile Include="Classes\ObjManager.cpp">
@@ -169,6 +172,9 @@
     </ClCompile>
     <ClCompile Include="Classes\CreateResources\EffectManager.cpp">
       <Filter>Classes\CreateResources</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Transform.cpp">
+      <Filter>Classes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -10,7 +10,7 @@
 #include <memory>
 #include <vector>
 #include "OriginalGeometric.h"
-#include "Rigidbody.h"
+#include "RigidbodyOld.h"
 #include <Effects.h>
 
 using namespace MyGeometory;
@@ -33,7 +33,7 @@ public:
 	{
 		SimpleMath::Matrix matrix;
 		matrix = SimpleMath::Matrix::Identity;
-		auto rigidbody = std::make_shared<Rigidbody>(primitive,matrix,pos, useGravity);
+		auto rigidbody = std::make_shared<RigidbodyOld>(primitive,matrix,pos, useGravity);
 		m_rigidbodies.push_back(rigidbody);
 	}
 
@@ -64,7 +64,7 @@ public:
 	}
 
 	void  GetPenetrationCorrection(
-		shared_ptr<Rigidbody>& a, shared_ptr<Rigidbody>& b)
+		shared_ptr<RigidbodyOld>& a, shared_ptr<RigidbodyOld>& b)
 	{
 		//InitPosは初期座標、halfExtentsは初期座標を中心点としたときの頂点から中心点までの距離
 		//a,bをもらってふつうに参照するわ‥‥
@@ -173,7 +173,7 @@ public:
 private:
 	vector<shared_ptr<Primitive>> m_primitives;
 
-	vector<shared_ptr<Rigidbody>> m_rigidbodies;
+	vector<shared_ptr<RigidbodyOld>> m_rigidbodies;
 
 };
 

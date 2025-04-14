@@ -1,13 +1,13 @@
 #include "..\Base\pch.h"
 #include "..\Base\dxtk.h"
-#include "Rigidbody.h"
+#include "RigidbodyOld.h"
 #include <random>
 
 //static std::random_device aa;                         // シード（ハードウェアベース乱数）
 //static std::mt19937 bbb(aa());
 
 //引数pos部分改修予定
-Rigidbody::Rigidbody(std::shared_ptr<Primitive> primitive, SimpleMath::Matrix matrix, SimpleMath::Vector3 pos, bool useGravity)
+RigidbodyOld::RigidbodyOld(std::shared_ptr<Primitive> primitive, SimpleMath::Matrix matrix, SimpleMath::Vector3 pos, bool useGravity)
 {
     shape = primitive;
     m_matrix = matrix;
@@ -22,7 +22,7 @@ Rigidbody::Rigidbody(std::shared_ptr<Primitive> primitive, SimpleMath::Matrix ma
     //shape->SetWorld(SimpleMath::Matrix::CreateTranslation(position));
 }
 
-void Rigidbody::Update()
+void RigidbodyOld::Update()
 {
     float dt = DXTK->Time.deltaTime;
 
@@ -47,7 +47,7 @@ void Rigidbody::Update()
     shape->SetWorld(SimpleMath::Matrix::CreateTranslation(position)); // 位置反映
 }
 
-void Rigidbody::ApplyCollision()
+void RigidbodyOld::ApplyCollision()
 {
 
     velocity *= -(hanpatsu);//めりこみをどうにかしないと永遠に下に沈む
@@ -58,7 +58,7 @@ void Rigidbody::ApplyCollision()
 /// <summary>
 /// 中心の座標を計算する
 /// </summary>
-SimpleMath::Vector3 Rigidbody::ComputeCenterFromVertices(const std::vector<MyVertex>& vertices) {
+SimpleMath::Vector3 RigidbodyOld::ComputeCenterFromVertices(const std::vector<MyVertex>& vertices) {
     SimpleMath::Vector3 min = vertices[0].position;
     SimpleMath::Vector3 max = vertices[0].position;
 
@@ -73,7 +73,7 @@ SimpleMath::Vector3 Rigidbody::ComputeCenterFromVertices(const std::vector<MyVer
 /// <summary>
 /// AABB生成
 /// </summary>
-SimpleMath::Vector3 Rigidbody::ComputeHalfExtentsFromVertices(const std::vector<MyVertex>& vertices) {
+SimpleMath::Vector3 RigidbodyOld::ComputeHalfExtentsFromVertices(const std::vector<MyVertex>& vertices) {
     SimpleMath::Vector3 min = vertices[0].position;
     SimpleMath::Vector3 max = vertices[0].position;
 

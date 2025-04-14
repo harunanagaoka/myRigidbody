@@ -10,7 +10,7 @@
 #include "Classes/CreateResources/CameraManager.h"
 #include "Classes/CreateResources/EffectManager.h"
 #include "Classes/OriginalGeometric.h"
-#include "Classes/Rigidbody.h"
+#include "Classes/RigidbodyOld.h"
 #include "Classes/ObjManager.h"
 
 using Microsoft::WRL::ComPtr;
@@ -54,7 +54,6 @@ private:
 	EffectManager m_effectManager;
 
 	ObjManager m_objManager;
-
 
 	std::shared_ptr<Primitive> shape_;
 
