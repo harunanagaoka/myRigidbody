@@ -11,7 +11,7 @@
 
 using namespace MyGeometory;
 
-class Rigidbody {
+class RigidbodyOld {
 public:
     bool isGravity = true;
 
@@ -32,7 +32,7 @@ public:
     SimpleMath::Matrix m_matrix;
     std::shared_ptr<Primitive> shape;
 
-    Rigidbody(std::shared_ptr<Primitive> primitive, SimpleMath::Matrix matrix,SimpleMath::Vector3 pos,bool useGravity);//ID3D12Device device
+    RigidbodyOld(std::shared_ptr<Primitive> primitive, SimpleMath::Matrix matrix,SimpleMath::Vector3 pos,bool useGravity);//ID3D12Device device
 
     void Update();
 

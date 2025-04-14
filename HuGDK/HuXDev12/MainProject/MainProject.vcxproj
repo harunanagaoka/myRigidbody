@@ -209,7 +209,8 @@
     <ClInclude Include="Classes\ObjManager.h" />
     <ClInclude Include="Classes\OriginalGeometric.h" />
     <ClInclude Include="Classes\OriginalGeometry.h" />
-    <ClInclude Include="Classes\Rigidbody.h" />
+    <ClInclude Include="Classes\RigidbodyOld.h" />
+    <ClInclude Include="Classes\Transform.h" />
     <ClInclude Include="Scenes\DontDestroyOnLoad.h" />
     <ClInclude Include="Scenes\MainScene.h" />
     <ClInclude Include="Scenes\Scene.h" />
@@ -241,7 +242,8 @@
     <ClCompile Include="Classes\ObjManager.cpp" />
     <ClCompile Include="Classes\OriginalGeometric.cpp" />
     <ClCompile Include="Classes\OriginalGeometry.cpp" />
-    <ClCompile Include="Classes\Rigidbody.cpp" />
+    <ClCompile Include="Classes\RigidbodyOld.cpp" />
+    <ClCompile Include="Classes\Transform.cpp" />
     <ClCompile Include="Scenes\MainScene.cpp" />
   </ItemGroup>
   <ItemGroup>
