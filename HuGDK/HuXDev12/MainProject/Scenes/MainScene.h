@@ -9,15 +9,12 @@
 #include "Classes/CreateResources/PipelineManager.h"
 #include "Classes/CreateResources/CameraManager.h"
 #include "Classes/CreateResources/EffectManager.h"
-#include "Classes/OriginalGeometric.h"
-#include "Classes/RigidbodyOld.h"
-#include "Classes/ObjManager.h"
+#include "Classes/Rigidbody.h"
 
 using Microsoft::WRL::ComPtr;
 using std::unique_ptr;
 using std::make_unique;
 using namespace DirectX;
-using namespace MyGeometory;
 
 class MainScene final : public Scene {
 public:
@@ -53,11 +50,15 @@ private:
 	CameraManager m_camera;
 	EffectManager m_effectManager;
 
-	ObjManager m_objManager;
+	//ObjManager m_objManager;
 
-	std::shared_ptr<Primitive> shape_;
+	//std::shared_ptr<Primitive> shape_;
 
 	float frameTimer = 0.0f;
 	int frameCount = 0;
 	float fps = 0.0f;
+
+	DirectXTK::GeometricPrimitive shape_;
+	Rigidbody rigidbody_;
+	bool m_aabbDirty = false;//true‚Ìê‡‚Ì‚İXV
 };

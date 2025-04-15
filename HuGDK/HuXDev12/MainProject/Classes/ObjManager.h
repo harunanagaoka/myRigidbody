@@ -10,7 +10,7 @@
 #include <memory>
 #include <vector>
 #include "OriginalGeometric.h"
-#include "RigidbodyOld.h"
+//#include "RigidbodyOld.h"
 #include <Effects.h>
 
 using namespace MyGeometory;
@@ -33,13 +33,13 @@ public:
 	{
 		SimpleMath::Matrix matrix;
 		matrix = SimpleMath::Matrix::Identity;
-		auto rigidbody = std::make_shared<RigidbodyOld>(primitive,matrix,pos, useGravity);
-		m_rigidbodies.push_back(rigidbody);
+		//auto rigidbody = std::make_shared<RigidbodyOld>(primitive,matrix,pos, useGravity);
+		//m_rigidbodies.push_back(rigidbody);
 	}
 
 	void UpdateAll()
 	{
-		for (auto& rb : m_rigidbodies)
+		/*for (auto& rb : m_rigidbodies)
 		{
 			rb->Update();
 		}
@@ -47,20 +47,20 @@ public:
 		if (m_rigidbodies.size() <= 1)
 		{
 			return;
-		}
+		}*/
 
-		for (size_t i = 0; i < m_rigidbodies.size(); ++i) {
-			for (size_t j = i + 1; j < m_rigidbodies.size(); ++j) {
-				auto& a = m_rigidbodies[i];
-				auto& b = m_rigidbodies[j];
+		//for (size_t i = 0; i < m_rigidbodies.size(); ++i) {
+		//	for (size_t j = i + 1; j < m_rigidbodies.size(); ++j) {
+		//		auto& a = m_rigidbodies[i];
+		//		auto& b = m_rigidbodies[j];
 
-				if (IsCollidingAABB(a->GetPos(), a->GetAABB(),
-					b->GetPos(), b->GetAABB())) {
-					GetPenetrationCorrection(a, b);//�߂肱�ݕ␳
-					a->ApplyCollision(); b->ApplyCollision();
-				}
-			}
-		}
+		//		if (IsCollidingAABB(a->GetPos(), a->GetAABB(),
+		//			b->GetPos(), b->GetAABB())) {
+		//			GetPenetrationCorrection(a, b);//�߂肱�ݕ␳
+		//			a->ApplyCollision(); b->ApplyCollision();
+		//		}
+		//	}
+		//}
 	}
 
 	void  GetPenetrationCorrection(
@@ -153,7 +153,7 @@ public:
 		int count = 0;
 		for (auto& pr : m_primitives)
 		{
-			shader->SetWorld(m_rigidbodies[count]->GetWorldMatrix());
+			//shader->SetWorld(m_rigidbodies[count]->GetWorldMatrix());
 			shader->Apply(DXTK->CommandList);
 			pr->Draw(DXTK->CommandList);
 			count++;
@@ -173,7 +173,7 @@ public:
 private:
 	vector<shared_ptr<Primitive>> m_primitives;
 
-	vector<shared_ptr<RigidbodyOld>> m_rigidbodies;
+	//vector<shared_ptr<RigidbodyOld>> m_rigidbodies;
 
 };
 

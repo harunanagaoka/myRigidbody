@@ -24,6 +24,7 @@ public:
     const  SimpleMath::Vector4& GetRotation() const { return m_rotation; }
     const SimpleMath::Vector3& GetScale() const { return m_scale; }
 
+    /// @brief 現在のtransformの値に応じたワールド行列を返します。
     const SimpleMath::Matrix& GetWorldMatrix() const { 
         if (m_isDirty) {
             UpdateMatrix();
