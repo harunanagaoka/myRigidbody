@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "..\Base\pch.h"
-#include "..\Base\dxtk.h"
+#include "..\..\Base\pch.h"
+#include "..\..\Base\dxtk.h"
 #include <array>
 
 using namespace std;
@@ -13,6 +13,7 @@ using namespace std;
 class BoxCollider {
 public:
     BoxCollider();//なんも入れなければ単位立方体を、Vec3入れた時は任意サイズにできるようにする
+    BoxCollider(SimpleMath::Vector3 size);
 
     void SetSize(const SimpleMath::Vector3& size); // 任意サイズの設定
 
@@ -20,6 +21,16 @@ public:
     void UpdateWorldVertices(const SimpleMath::Matrix& worldMatrix); 
 
     const array<SimpleMath::Vector3, 8> GetWorldVertices() const { return m_worldVertices; }
+
+    SimpleMath::Vector3 ComputeCenter() const {
+        SimpleMath::Vector3 sum = SimpleMath::Vector3::Zero;
+
+        for (const auto& v : m_worldVertices) {
+            sum += v;
+        }
+        
+        return sum / 8.0f;
+    }
 
 private:
     SimpleMath::Vector3 m_localSize = SimpleMath::Vector3(1.0f, 1.0f, 1.0f); // コライダーのローカルサイズ
@@ -40,7 +51,7 @@ private:
         SimpleMath::Vector3(-0.5f,  0.5f,  0.5f),
         SimpleMath::Vector3( 0.5f,  0.5f,  0.5f),
     };
-
+};
     //（外から）衝突してるカモ→コライダー側でtransformからワールド頂点取得
     //ワールド頂点返す→他のボックスのワールド頂点と比べて衝突点を調べてもらう
 
@@ -70,4 +81,3 @@ private:
     //    0, 4, 1,
     //    1, 4, 5
     //};
-};

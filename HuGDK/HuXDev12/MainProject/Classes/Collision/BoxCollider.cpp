@@ -1,9 +1,15 @@
 
 #include "BoxCollider.h"
 
+/// @brief 引数を何も入力しない場合は1×1×1の大きさになります。
 BoxCollider::BoxCollider() {
-	m_localVertices = m_primitiveVertices;
 
+	m_localVertices = m_primitiveVertices;
+}
+
+BoxCollider::BoxCollider(SimpleMath::Vector3 size) {
+
+	SetSize(size);
 }
 
 ///@brief コライダーのサイズを入力した値に変更します。

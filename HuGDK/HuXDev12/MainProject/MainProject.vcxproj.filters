@@ -25,6 +25,9 @@
     <Filter Include="Classes\CreateResources">
       <UniqueIdentifier>{fd513ddc-8c46-400a-bbbc-f77c8d7ca076}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Collider">
+      <UniqueIdentifier>{75ee9250-a921-4fe5-966e-53e5422597cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Base\pch.h">
@@ -120,8 +123,14 @@
     <ClInclude Include="Classes\Rigidbody.h">
       <Filter>Classes</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\BoxCollider.h">
-      <Filter>Classes</Filter>
+    <ClInclude Include="Classes\Collision\BoxCollider.h">
+      <Filter>Classes\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\CollisionDetection.h">
+      <Filter>Classes\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\CollisionManager.h">
+      <Filter>Classes\Collider</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -176,8 +185,14 @@
     <ClCompile Include="Classes\Rigidbody.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\BoxCollider.cpp">
-      <Filter>Classes</Filter>
+    <ClCompile Include="Classes\Collision\BoxCollider.cpp">
+      <Filter>Classes\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Collision\CollisionDetection.cpp">
+      <Filter>Classes\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Collision\CollisionManager.cpp">
+      <Filter>Classes\Collider</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
