@@ -202,7 +202,9 @@
     <ClInclude Include="Base\wiGamepad\wiRawGamepad.h" />
     <ClInclude Include="Base\wiGamepad\wiVector.h" />
     <ClInclude Include="Base\wiGamepad\wiXInput.h" />
-    <ClInclude Include="Classes\BoxCollider.h" />
+    <ClInclude Include="Classes\Collision\BoxCollider.h" />
+    <ClInclude Include="Classes\Collision\CollisionDetection.h" />
+    <ClInclude Include="Classes\Collision\CollisionManager.h" />
     <ClInclude Include="Classes\CreateResources\CameraManager.h" />
     <ClInclude Include="Classes\CreateResources\EffectManager.h" />
     <ClInclude Include="Classes\CreateResources\PipelineManager.h" />
@@ -236,7 +238,9 @@
     <ClCompile Include="Base\wiGamepad\wiMath.cpp" />
     <ClCompile Include="Base\wiGamepad\wiRawGamepad.cpp" />
     <ClCompile Include="Base\wiGamepad\wiXInput.cpp" />
-    <ClCompile Include="Classes\BoxCollider.cpp" />
+    <ClCompile Include="Classes\Collision\BoxCollider.cpp" />
+    <ClCompile Include="Classes\Collision\CollisionDetection.cpp" />
+    <ClCompile Include="Classes\Collision\CollisionManager.cpp" />
     <ClCompile Include="Classes\CreateResources\CameraManager.cpp" />
     <ClCompile Include="Classes\CreateResources\EffectManager.cpp" />
     <ClCompile Include="Classes\CreateResources\PipelineManager.cpp" />

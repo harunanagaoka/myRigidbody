@@ -1,26 +1,35 @@
 //
-// Rigidbody.h
-//
+//Rigidbody.h
+//重力と衝突応答をtransformに反映する
 
 #pragma once
 
 #include "..\Base\pch.h"
 #include "..\Base\dxtk.h"
 #include "Transform.h"
+#include "Collision\BoxCollider.h"
 
 class Rigidbody{
 public:
-	Rigidbody() { m_transform = new Transform(); }
-	
-	//Oldでやってたいろんな計算がいらなくなるかも
-	void Update() { 
-		//m_transform->SetPosition(SimpleMath::Vector3(aiu, 0, 0)); 
-		}
-	const SimpleMath::Matrix& Draw() { return m_transform->GetWorldMatrix(); }
+	void Update();
+
+	void ComputeGravity(float dt);
+
+	const SimpleMath::Matrix& Draw() { return m_transform.GetWorldMatrix(); }
 
 private:
-	Transform* m_transform;//ポインタにする必要無いかも？
-	float aiu = 0.1;
+	Transform m_transform;
+
+	SimpleMath::Vector3 m_velocity = SimpleMath::Vector3::Zero;
+
+	//重力
+	bool m_isGravity = true;
+	float m_gravityScale = 1.0;
+	float m_mass = 0.5;
+	const float m_gravityAccelConst = 9.8;
+
+	
+	
 };
 
 
