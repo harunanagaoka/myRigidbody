@@ -132,6 +132,9 @@
     <ClInclude Include="Classes\Collision\CollisionManager.h">
       <Filter>Classes\Collider</Filter>
     </ClInclude>
+    <ClInclude Include="Classes\Collision\EPAclass.h">
+      <Filter>Classes\Collider</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Base\Main.cpp">
@@ -192,6 +195,9 @@
       <Filter>Classes\Collider</Filter>
     </ClCompile>
     <ClCompile Include="Classes\Collision\CollisionManager.cpp">
+      <Filter>Classes\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Collision\EPAclass.cpp">
       <Filter>Classes\Collider</Filter>
     </ClCompile>
   </ItemGroup>
