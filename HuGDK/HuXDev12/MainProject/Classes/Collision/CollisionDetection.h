@@ -16,288 +16,332 @@ constexpr size_t g_maxSimplexSize = 4;
 
 class CollisionDetection {
 public:
+	struct PointInfo {
+		SimpleMath::Vector3 point;
+		SimpleMath::Vector3 supA, supB;
+	};
+
+	struct FaceInfo {
+		SimpleMath::Vector3 indexA, indexB, indexC;//頂点
+		size_t Anum, Bnum, Cnum;//polytopeの数に対応している
+		SimpleMath::Vector3 normal;//法線
+		float distanceToOrigin;
+	};
+
+	struct ContactInfo {
+		SimpleMath::Vector3 contactPointA = SimpleMath::Vector3::Zero; 
+		SimpleMath::Vector3 contactPointB = SimpleMath::Vector3::Zero;
+		SimpleMath::Vector3 normal = SimpleMath::Vector3::Zero;        // 法線（A→B）
+		float penetrationDepth = 0;           // めり込み
+		SimpleMath::Vector3 tangent1 = SimpleMath::Vector3::Zero;     // 摩擦方向１
+		SimpleMath::Vector3 tangent2 = SimpleMath::Vector3::Zero;     // 摩擦方向２
+	};
 
 	size_t IndexOfFurthestPoint(const array<SimpleMath::Vector3, 8>& vertices,
-							 const SimpleMath::Vector3& direction)
-	{
-		float maxDot = -FLT_MAX;
-		size_t index = 0;
+		const SimpleMath::Vector3& direction);
 
-		for (int i = 0;i < vertices.size();i++)
-		{
-			float dot = vertices[i].Dot(direction);//directionとvertexの内積
+	/*SimpleMath::Vector3 Support(const array<SimpleMath::Vector3, 8> vertices_1,const array<SimpleMath::Vector3, 8> vertices_2,
+								const SimpleMath::Vector3& direction);*/
 
-			if (dot > maxDot)//最大の点を求める
-			{
-				maxDot = dot;
-				index = i;
-			}
-		}
+	bool HandleTetrahedron(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& d);
 
-		return index;
-	}
+	bool HandleTriangle(std::array<SimpleMath::Vector3, 4>& simplex, size_t& index, SimpleMath::Vector3& direction);
+	
+	bool GJK(const BoxCollider& collider_1,const BoxCollider& collider_2);
 
-	//// Minkowski sum support function for GJK
-	SimpleMath::Vector3 Support(const array<SimpleMath::Vector3, 8> vertices_1,
-								const array<SimpleMath::Vector3, 8> vertices_2,
-								const SimpleMath::Vector3& direction)
-	{
+	SimpleMath::Vector3 Support(const array<SimpleMath::Vector3, 8>& vertices_1, const array<SimpleMath::Vector3, 8>& vertices_2,  SimpleMath::Vector3& direction) {
+		PointInfo pointInfo;
+
 		size_t i = IndexOfFurthestPoint(vertices_1, direction);
+		pointInfo.supA = vertices_1[i];
 
 		size_t j = IndexOfFurthestPoint(vertices_2, -direction);
+		pointInfo.supB = vertices_2[j];
 
-		return vertices_1[i] - vertices_2[j];
+		pointInfo.point = pointInfo.supA - pointInfo.supB;
+		m_polytope.push_back(pointInfo);
+
+		return pointInfo.point;
 	}
 
-	bool HandleTetrahedron(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& d)
-	{
-		// 四面体の頂点 A, B, C, D （Aが最新＝support点）
-		const SimpleMath::Vector3& A = simplex[3];
-		const SimpleMath::Vector3& B = simplex[2];
-		const SimpleMath::Vector3& C = simplex[1];
-		const SimpleMath::Vector3& D = simplex[0];
-
-		// 原点に向かうベクトル
-		SimpleMath::Vector3 AO = -A;
-
-		// 各面の法線を計算　
-		SimpleMath::Vector3 ABCNormal = (B - A).Cross(C - A);// ABC面
-		SimpleMath::Vector3 ACDNormal = (C - A).Cross(D - A);// ACD面
-		SimpleMath::Vector3 ADBNormal = (D - A).Cross(B - A);// ADB面
-
-		// 法線を内向きに揃える
-		if (ABCNormal.Dot(D - A) < 0)
-		{
-			ABCNormal = -ABCNormal;
-		}
-		if (ACDNormal.Dot(B - A) < 0)
-		{
-			ACDNormal = -ACDNormal;
-		}
-		if (ADBNormal.Dot(C - A) < 0)
-		{
-			ADBNormal = -ADBNormal;
-		}
-
-
-		//原点が含まれるか
-		if (ABCNormal.Dot(AO) < 0)
-		{
-			simplex = { C, B, A }; 
-			index = 3;
-			d = -ABCNormal;
-			return false;
-		}
-
-		if (ACDNormal.Dot(AO) < 0)
-		{
-			simplex = { D, C, A };
-			index = 3;
-			d = -ACDNormal;
-			return false;
-		}
-
-		if (ADBNormal.Dot(AO) < 0)
-		{
-			simplex = { B, D, A };
-			index = 3;
-			d = -ADBNormal;
-			return false;
-		}
-			//全ての面の内向き法線が原点方向 → 四面体が原点を囲んでいる
-			return true;
-	}
-
-	bool HandleTriangle(std::array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& direction)
-	{
-		const SimpleMath::Vector3& a = simplex[2];
-		const SimpleMath::Vector3& b = simplex[1];
-		const SimpleMath::Vector3& c = simplex[0];
-
-		SimpleMath::Vector3 ao = -a;//原点方向
-		SimpleMath::Vector3 ab = b - a;
-		SimpleMath::Vector3 ac = c - a;
-
-		SimpleMath::Vector3 acperp = ac.Cross(ab).Cross(ac);//外向き法線
-
-		//acperp.Dot(ao) <= 0 かつ abperp.Dot(ao) <= 0であれば三角形の内側に原点がある
-
-		if (acperp.Dot(ao) > 0)//原点がACの外にいるかどうか
-		{
-			simplex[0] = simplex[1];//Cを捨てる
-			simplex[1] = simplex[2];
-			index = 2;
-			direction = acperp;
-			return false;
-		}
-
-		SimpleMath::Vector3 abperp = ab.Cross(ac).Cross(ab);
-
-		if (abperp.Dot(ao) > 0)//原点がABの外にいるかどうか
-		{
-			simplex[0] = simplex[1];//Cを捨てる
-			simplex[1] = simplex[2];
-			index = 2;
-			direction = abperp;
-			return false;
-		}
-
-		//ここまで来たら原点が三角形の内側にある→四面体フェーズへ
-
-		SimpleMath::Vector3 normal = ab.Cross(ac);//面の法線
-		if (normal.Dot(ao) < 0)
-		{
-			normal = -normal; 
-		}
-		direction = normal;//原点方向に探索する
-		return true;
-	}
-
-	bool GJK(const BoxCollider& collider_1,
-			 const BoxCollider& collider_2)
+	bool EPA(const BoxCollider& collider_1, const BoxCollider& collider_2,std::array<SimpleMath::Vector3, g_maxSimplexSize>& simplex)
 	{
 		const array<SimpleMath::Vector3, 8> vertices_1 = collider_1.GetWorldVertices();
 		const array<SimpleMath::Vector3, 8> vertices_2 = collider_2.GetWorldVertices();
 
-		array<SimpleMath::Vector3, g_maxSimplexSize> simplex;
-		SimpleMath::Vector3 ao, ab,ac, a, b, c,abperp, acperp;
+		//GJKから受け取ったシンプレックスをvectorに移す（ポリトープ）
+		vector<SimpleMath::Vector3> polytope(simplex.begin(), simplex.end());
+		vector<size_t> faces = {0, 1, 2,
+								0, 3, 1,
+								0, 2, 3,
+								1, 3, 2};//四面体
+		vector<FaceInfo> facesInfo;
 
-		size_t index = 0;//現在のsimplexの頂点数
+		//すべての三角面の法線（+距離）を計算し、原点に最も近い面を探して返す
+		size_t minFace = GetFaceNormals(polytope, faces, facesInfo);//原点に一番近いと思われる面の法線と距離
+		//★戻り値をminFaceのみにする
 
-		//コライダーの中心点を求める
-		SimpleMath::Vector3 center_1 = collider_1.ComputeCenter();
-		SimpleMath::Vector3 center_2 = collider_2.ComputeCenter();
+		SimpleMath::Vector3 minNormal;
+		float minDistance = FLT_MAX;
+		SimpleMath::Vector3 support;
 
-		//index が1つの時　→シンプレックス0次元の判定
-		//center_2→center_1の方向を求める
-		SimpleMath::Vector3 d = center_1 - center_2;
+		minNormal = SimpleMath::Vector3(facesInfo[minFace].normal);//法線ベクトル
+		minDistance = facesInfo[minFace].distanceToOrigin;//距離
 
-		if (d.LengthSquared() < 1e-6f)
-		{
-			d = SimpleMath::Vector3::UnitX;//中心点が同じならひとまずX軸から原点方向へ
-		}
+		while (true) {//メインループ
 
-		//最初のシンプレックスを求める
-		a = simplex[0] = Support(vertices_1, vertices_2, d);
-		index++;
+			support = Support(vertices_1, vertices_2, facesInfo[minFace].normal);
 
-		if (a.Dot(d) < 0)
-		{
-			return false;//接触なし
-		}
-		
-		d = -a;//次の探索方向を決める
-		
-		//2つめのシンプレックスを求める
-		a = Support(vertices_1, vertices_2, d);
+			//★avoidfaceポリトープ破壊
+			std::vector<size_t> facesToRemove;
+			std::vector<std::pair<size_t, size_t>> uniqueEdges;
 
-		if (a.Dot(d) < 0)
-		{
-			return false;
-		}
+			for (size_t i = 0; i < facesInfo.size(); i++) {
+				if (facesInfo[i].normal.Dot(support) > 0) {
+					size_t f = i * 3;
 
-		simplex[index++] = a;//2点目
+					AddIfUniqueEdge(uniqueEdges, faces, f, f + 1);
+					AddIfUniqueEdge(uniqueEdges, faces, f + 1, f + 2);
+					AddIfUniqueEdge(uniqueEdges, faces, f + 2, f);
 
-		d = ao = -a;//原点方向へのベクトル
-
-		//ここから2点の時の例外処理
-		if (d.LengthSquared() < 1e-6f)
-		{
-			b = simplex[0];
-			ab = b - a;
-			d = ab.Cross(ao).Cross(ab);
-
-			if (d.LengthSquared() < 1e-6f)
-			{
-				d = ab.Cross(SimpleMath::Vector3::UnitX);
-
-				if (d.LengthSquared() < 1e-6f)
-				{
-					d = ab.Cross(SimpleMath::Vector3::UnitY);
-
-					if (d.LengthSquared() < 1e-6f)
-					{
-						d = SimpleMath::Vector3::UnitZ;
-					}
+					facesToRemove.push_back(i);//消す予定の番号
 				}
 			}
-		}
-		//ここまで例外処理
+			std::sort(facesToRemove.rbegin(), facesToRemove.rend());//重複除去　後ろから消す
+			for (size_t index : facesToRemove) {
+				// FaceInfo削除
+				facesInfo.erase(facesInfo.begin() + index);
 
-		int count = 0;
-		while (count++ < 50)
-		{
-			a = Support(vertices_1, vertices_2, d);
-
-			if (a.Dot(d) < 0)
-			{
-				return false;
+				// 対応するfacesインデックス3つを削除（index*3 から3連）
+				size_t base = index * 3;
+				faces.erase(faces.begin() + base, faces.begin() + base + 3);
 			}
+			//★avoidface
 
-			simplex[index++] = a;//3点目
+			polytope.push_back(support);//サポート点追加
+			
+			//★addnewface
+			std::vector<FaceInfo> newFacesInfo;
+			for (auto [edgeIndex1, edgeIndex2] : uniqueEdges) {
+				FaceInfo newFaceInfo;
+				size_t supportIndex = polytope.size() - 1;
 
-			if (HandleTriangle(simplex, index, d))
-			{
+				newFaceInfo.indexA = polytope[edgeIndex1];
+				newFaceInfo.indexB = polytope[edgeIndex2];
+				newFaceInfo.indexC = polytope[supportIndex];
+				newFacesInfo.push_back(newFaceInfo);
+				faces.push_back(edgeIndex1);
+				faces.push_back(edgeIndex2);
+				faces.push_back(supportIndex);
+			}
+			
+			float oldMinDistance = facesInfo[minFace].distanceToOrigin; 
+			minFace = GetFaceNormals(polytope, faces, newFacesInfo);
+			//原点→シンプレックス最接近点ｄを求める
+			//サポート関数でｄ方向で最も遠い点vを探す
+			//★addnewface
+
+			for (size_t i = 0; i < newFacesInfo.size(); i++) {
+				if (newFacesInfo[i].distanceToOrigin < oldMinDistance) {
+					minDistance = newFacesInfo[i].distanceToOrigin;
+					minFace = facesInfo.size() + i;
+				}
+			}
+			facesInfo.insert(facesInfo.end(), newFacesInfo.begin(), newFacesInfo.end());
+			//★addnewface
+			//★checkdistance
+			float sDistance = facesInfo[minFace].normal.Dot(support);
+
+			if (abs(sDistance - minDistance) <= 1e-6f) {//終了チェック
+				//minDistance = FLT_MAX;
 				break;
 			}
+			//★checkdistance
 
+			minDistance = FLT_MAX;//ループ継続
 		}
 
-		if (index <= 2)
-		{
-			return false;//HandleTriangleがtrueにならなかった時
-		}
+//デストラクタ
+		SimpleMath::Vector3 tangent1, tangent2, contactPointA, contactPointB;
+		//minNormal→跳ね返る方向
+		//tangent1→摩擦その①（たとえば横方向スリップ）横方向の滑りを止める
+		//tangent2→摩擦その②（たとえば前後スリップ）前後方向の滑りを止める
 
-		//無限ループ防止
-		count = 0;
-		while (count++ < 50)//シンプレックスが4の時の処理
-		{
-			a = Support(vertices_1, vertices_2, d);
+		//★タンジェントの計算
+		ComputeTangentBasis(minNormal, tangent1, tangent2);
 
-			if (a.Dot(d) < 0)
-			{
-				return false;
-			}
 
-			simplex[index++] = a;//4点目追加
+		//接触点の計算
+		//★FaceInfo[minFace]を渡す
+		ComputeBarycentric(facesInfo[minFace], contactPointA, contactPointB);
 
-			if (HandleTetrahedron(simplex, index, d))
-			{
-				return true;
-			}
-		}
+		ContactInfo info;
+		info.contactPointA = contactPointA;
+		info.contactPointB = contactPointB;
+		info.tangent1 = tangent1;
+		info.tangent2 = tangent2;
+		info.normal = minNormal;
+		info.penetrationDepth = facesInfo[minFace].distanceToOrigin;
+		//info.penetrationDepth = max(0.0f, facesInfo[minFace].distanceToOrigin - bias);
+		//めりこむ場合は上記を入れてみる
+
+		//今はfalseを返してるけど衝突情報の構造体を返す予定
 		return false;
 	}
 
+	void ComputeBarycentric(FaceInfo minFace,SimpleMath::Vector3& contactPointA, SimpleMath::Vector3& contactPointB)
+	{
+		//求め方
+// 三角形 A, B, C と、内部の点 P に対して：
 
-private :
-	//サポート関数作成　図形Oと方向ｖを渡すと内積が最大（原点から遠い点）になる点を返す関数
-	//support(A, v) - support(B, -v)でAとBのミンコフスキ差図形とvのサポート点が求められる
-	//ミンコフスキー差の中心点はAと同じである。
+		PointInfo& pA = m_polytope[minFace.Anum];
+		PointInfo& pB = m_polytope[minFace.Bnum];
+		PointInfo& pC = m_polytope[minFace.Cnum];
 
-	//Aの原点からBの原点を結ぶベクトルを求める-＞V
-	//Vとミンコフスキ差図形のベクトルで一番原点に近い（同じ方向の）点を求める
-	//求めた点と原点を結んだベクトルを求める-＞W
-	//[2点を結んだ線]と原点の最接近点と原点のベクトルX求める
-	//ベクトルXで作った点も使い三角形作る
-	//三角形と原点の最接近点と原点でまた点を作り、四面体作る
-	//四面体が原点を含むか見る
+		SimpleMath::Vector3 A, B, C, P;
+		A = minFace.indexA;
+		B = minFace.indexB;
+		C = minFace.indexC;
+		P = SimpleMath::Vector3::Zero;//原点
 
+		SimpleMath::Vector3 v0 = B - A;
+		SimpleMath::Vector3 v1 = C - A;
+		SimpleMath::Vector3 v2 = P - A;
 
-	//Johnson's Distanceアルゴリズム　めりこみ計測
-	//四面体が内包している原点から一番近い四面体の点を求め原点とのベクトルを求める
-	//上のベクトルの方向にある凸包上の一番遠い点Xを求める
-	//四面体を作っていた点に点Xを追加し、直方体にする
-	//直方体内で一番原点に近い点を求め、原点と結びベクトルに
-	//点を増やしていき、収束するまで続ける
-	//※新しく追加された頂点によって出来る面だけ再計算
+		float d00 = v0.Dot(v0);
+		float d01 = v0.Dot(v1);
+		float d11 = v1.Dot(v1);
+		float d20 = v2.Dot(v0);
+		float d21 = v2.Dot(v1);
 
-	//収束点は、オブジェクトA,Bの距離と等しい。
-	//原点と収束点を結んだベクトルが力の向きになる。
+		float denom = d00 * d11 - d01 * d01;
+		float v = (d11 * d20 - d01 * d21) / denom;
+		float w = (d00 * d21 - d01 * d20) / denom;
+		float u = 1.0f - v - w;
+		//★座標も入った三角形の構造体受け取り計算
+		contactPointA = u * pA.supA + v * pB.supA + w * pC.supA;
+		contactPointB = u * pA.supB + v * pB.supB + w * pC.supB;
+	}
+
+	void ComputeTangentBasis(const SimpleMath::Vector3& normal, SimpleMath::Vector3& tangent1, SimpleMath::Vector3& tangent2)
+	{
+		if (normal.x >= 0.57735f)//√(1 / 3) の近似値
+		{
+			tangent1 = SimpleMath::Vector3(normal.y, -normal.x, 0.0f);
+		}
+		else
+		{
+			tangent1 = SimpleMath::Vector3(0.0f, normal.z, -normal.y);
+		}
+
+		tangent1.Normalize();
+		tangent2 = normal.Cross(tangent1);
+	}
+
+	void AddIfUniqueEdge(
+		std::vector<std::pair<size_t, size_t>>& edges,
+		const std::vector<size_t>& faces,
+		size_t a,
+		size_t b)
+	{
+		auto reverse = std::find(                       //      0--<--3
+			edges.begin(),                              //     / \ B /   A: 2-0
+			edges.end(),                                //    / A \ /    B: 0-2
+			std::make_pair(faces[b], faces[a]) //   1-->--2
+		);
+
+		if (reverse != edges.end()) {
+			edges.erase(reverse);
+		}
+
+		else {
+			edges.emplace_back(faces[a], faces[b]);
+		}
+	}
+
+	//bool SameDirection(SimpleMath::Vector4 normal, SimpleMath::Vector3 support) {
+	//	SimpleMath::Vector3 vec3normal = SimpleMath::Vector3(normal.x, normal.y, normal.z);
+
+	//	return vec3normal.Dot(support) > 0;
+	//}
+
+	 size_t GetFaceNormals(const std::vector<SimpleMath::Vector3>& polytope,
+																	   const std::vector<size_t>& faces, vector<FaceInfo>& facesInfo)
+	{
+		std::vector<SimpleMath::Vector4> normals;
+		size_t minTriangle = 0;
+		float  minDistance = FLT_MAX;
+
+		for (size_t i = 0; i < faces.size(); i += 3) {
+
+			FaceInfo faceInfo;
+			facesInfo.push_back(faceInfo);
+
+			SimpleMath::Vector3 a = faceInfo.indexA = polytope[faces[i]];
+			faceInfo.Anum = faces[i];
+
+			SimpleMath::Vector3 b = faceInfo.indexB = polytope[faces[i + 1]];
+			faceInfo.Bnum = faces[i + 1];
+
+			SimpleMath::Vector3 c = faceInfo.indexC = polytope[faces[i + 2]];
+			faceInfo.Cnum = faces[i + 2];
+			//ここのabcのインデックスを保持する（vectorで保存するか迷っとる）
+
+			SimpleMath::Vector3 normal = (b - a).Cross(c - a);
+			normal.Normalize();
+			faceInfo.normal = normal;
+
+			float distance = normal.Dot(a);
+
+			if (distance < 0) {
+				normal *= -1;
+				distance *= -1;
+			}
+			faceInfo.distanceToOrigin = distance;
+
+			normals.emplace_back(SimpleMath::Vector4(normal.x,normal.y,normal.z,distance));
+
+			if (distance < minDistance) {
+				minTriangle = i / 3;
+				minDistance = distance;
+			}
+		}
+
+		return minTriangle;
+	}
+
 
 private:
-
+	vector<PointInfo> m_polytope;
 };
+
+
+//サポート関数作成　図形Oと方向ｖを渡すと内積が最大（原点から遠い点）になる点を返す関数
+//support(A, v) - support(B, -v)でAとBのミンコフスキ差図形とvのサポート点が求められる
+//ミンコフスキー差の中心点はAと同じである。
+
+//Aの原点からBの原点を結ぶベクトルを求める-＞V
+//Vとミンコフスキ差図形のベクトルで一番原点に近い（同じ方向の）点を求める
+//求めた点と原点を結んだベクトルを求める-＞W
+//[2点を結んだ線]と原点の最接近点と原点のベクトルX求める
+//ベクトルXで作った点も使い三角形作る
+//三角形と原点の最接近点と原点でまた点を作り、四面体作る
+//四面体が原点を含むか見る
+
+
+//Johnson's Distanceアルゴリズム　めりこみ計測
+//四面体が内包している原点から一番近い四面体の点を求め原点とのベクトルを求める
+//上のベクトルの方向にある凸包上の一番遠い点Xを求める
+//四面体を作っていた点に点Xを追加し、直方体にする
+//直方体内で一番原点に近い点を求め、原点と結びベクトルに
+//点を増やしていき、収束するまで続ける
+//※新しく追加された頂点によって出来る面だけ再計算
+
+//収束点は、オブジェクトA,Bの距離と等しい。
+//原点と収束点を結んだベクトルが力の向きになる。
+
+
+
 //BoxColliderどうしを、ミンコフスキ差を使い衝突判定を行う
 
 /*
