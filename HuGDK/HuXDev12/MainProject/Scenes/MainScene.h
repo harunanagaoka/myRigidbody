@@ -9,7 +9,8 @@
 #include "Classes/CreateResources/PipelineManager.h"
 #include "Classes/CreateResources/CameraManager.h"
 #include "Classes/CreateResources/EffectManager.h"
-#include "Classes/Rigidbody.h"
+#include "Classes/Collision/CollisionManager.h"
+#include "Classes/Interface/ObjectManager.h"
 
 using Microsoft::WRL::ComPtr;
 using std::unique_ptr;
@@ -59,6 +60,14 @@ private:
 	float fps = 0.0f;
 
 	DirectXTK::GeometricPrimitive shape_;
-	Rigidbody rigidbody_;
+	DirectXTK::GeometricPrimitive shape_2;
+
+	//DirectXTK::GeometricPrimitive shape_two;
+
 	bool m_aabbDirty = false;//true‚Ìê‡‚Ì‚İXV
+	CollisionManager m_collisionManager;
+	ObjectManager m_objManager;
+	int objectID;
+
+	int objectID2;
 };

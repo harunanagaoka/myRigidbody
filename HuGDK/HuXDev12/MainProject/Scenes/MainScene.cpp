@@ -51,7 +51,8 @@ void MainScene::CreateDeviceDependentResources()
 	m_camera.Initialize();
 	m_effectManager.Initialize();
 
-	shape_ = GeometricPrimitive::CreateTeapot();
+	shape_ = GeometricPrimitive::CreateCube(); 
+	shape_2 = GeometricPrimitive::CreateCube();
 
 }
 
@@ -64,14 +65,23 @@ void MainScene::CreateResources()
 void MainScene::Initialize()
 {
 
-	m_camera.Get().SetViewLookAt(Vector3(0.0f, 0.0f, -20), Vector3::Zero, Vector3::UnitY);
+	m_camera.Get().SetViewLookAt(Vector3(0.0f, 0.0f, -10.0f), Vector3::Zero, Vector3::UnitY);
 	//カメラの設置（カメラを置く座標,目標の座標（向き）,カメラのy軸方向）
 
 	m_camera.Get().SetPerspectiveFieldOfView(
 		Mathf::PI / 4.0f,(float)DXTK->SwapChain.Width / (float)DXTK->SwapChain.Height,
 		0.1f, 10000.0f);
 
+	objectID = m_objManager.CreateObject();
+	m_objManager.GetRigidbody(objectID)->SetStatic(true);
+	m_objManager.GetTransform(objectID)->SetPosition(SimpleMath::Vector3(0, 0, 0));
+
+	objectID2 = m_objManager.CreateObject();
+	m_objManager.GetTransform(objectID2)->SetPosition(SimpleMath::Vector3(0.2, 3, 0));
 	
+	
+	
+m_objManager.Initialize();
 }
 
 // Releasing resources required for termination.
@@ -99,13 +109,11 @@ void MainScene::OnRestartSound()
 {
 
 }
-static std::random_device rd;                         // シード（ハードウェアベース乱数）
-static std::mt19937 gen(rd());                        // メルセンヌ・ツイスタ（乱数エンジン）
 
 // Updates the scene.
 NextScene MainScene::Update(const float deltaTime)
 {
-	rigidbody_.Update();
+	m_objManager.Update();
 
 	return NextScene::Continue;
 }
@@ -126,11 +134,9 @@ void MainScene::Render()
 	effect->SetView(camera.GetViewMatrix());
 	effect->SetProjection(camera.GetProjectionMatrix());
 
-	//effect->SetWorld(rigidbody_.Draw());//rigidbodyからマトリクスを受け取るかどうかは要検討
-	effect->Apply(commandList);
-	shape_->Draw(commandList);
-
-
+	//ここでobjマネージャー呼ぶ
+	m_objManager.Draw(effect, shape_,1);
+	m_objManager.Draw(effect, shape_2, 2);
 
 	DXTK->EndScene();
 

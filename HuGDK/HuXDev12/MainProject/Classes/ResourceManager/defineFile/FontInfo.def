@@ -1,0 +1,6 @@
+// SpriteData.def
+
+ITEM(msgothic,"Font//msgothic.spritefont")
+
+ITEM(FontsCount,"FontsCount")
+

@@ -1,0 +1,47 @@
+// SpriteData.def
+
+//Stage
+ITEM(Stage_Labo,	"Stage_Labo.PNG")
+ITEM(Stage_Circle,	"Stage_Circle.PNG")
+ITEM(Stage_Pentagon,"Stage_Pentagon.PNG")
+
+
+
+//Player
+ITEM(PlayerFront,	"PlayerFront.PNG")
+ITEM(PlayerSide,	"PlayerSide.PNG")
+
+//Enemy
+ITEM(Shiromaru,		"Enemy//Shiromaru.PNG")
+ITEM(miyabimaru,	"Enemy//miyabimaru.PNG")
+ITEM(SperStar,		"Enemy//SperStar.PNG")
+ITEM(CuteStar,		"Enemy//CuteStar.PNG")
+ITEM(TriMagenta,	"Enemy//TriOrange.PNG")
+ITEM(TriOrange,		"Enemy//TriOrange.PNG")
+ITEM(BrueAngle,		"Enemy//BrueAngle.PNG")
+ITEM(BLACKRECT,		"Enemy//BLACKRECT.PNG")
+ITEM(WHITERECT,		"Enemy//WHITERECT.PNG")
+
+//Effect
+ITEM(PlShot,		"PlShot.PNG")
+
+//Title
+ITEM(Title_1,		"Title//Title_1.PNG")
+ITEM(Title_2,		"Title//Title_2.PNG")
+ITEM(Title_3,		"Title//Title_3.PNG")
+ITEM(Title_4,		"Title//Title_4.PNG")
+ITEM(HowToMove,		"Title//HowToMove.PNG")
+ITEM(HowToShot,		"Title//HowToShot.PNG")
+ITEM(StartBottom,	"Title//StartBottom.PNG")
+
+ITEM(Result_,	    "Result.PNG")
+
+
+//Debug
+ITEM(slime,         "Debug//slime.png")
+ITEM(sword,			"Debug//sword.PNG")
+ITEM(DebugTexture,  "Debug//DebugTexture.PNG")
+
+//à»â∫ÇÕïKÇ∏ç≈å„ÇÃçsÇ…ÇµÇƒÇ≠ÇæÇ≥Ç¢
+ITEM(DescriptorCount,"Debug//sword.PNG")
+

@@ -28,6 +28,9 @@
     <Filter Include="Classes\Collider">
       <UniqueIdentifier>{75ee9250-a921-4fe5-966e-53e5422597cd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Interface">
+      <UniqueIdentifier>{d0bd84ff-cfab-4dd7-a671-c65bd02c4a26}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Base\pch.h">
@@ -129,11 +132,14 @@
     <ClInclude Include="Classes\Collision\CollisionDetection.h">
       <Filter>Classes\Collider</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\Collision\CollisionManager.h">
-      <Filter>Classes\Collider</Filter>
-    </ClInclude>
     <ClInclude Include="Classes\Collision\EPAclass.h">
       <Filter>Classes\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Interface\Object.h">
+      <Filter>Classes\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Interface\ObjectManager.h">
+      <Filter>Classes\Interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -194,11 +200,14 @@
     <ClCompile Include="Classes\Collision\CollisionDetection.cpp">
       <Filter>Classes\Collider</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\Collision\CollisionManager.cpp">
-      <Filter>Classes\Collider</Filter>
-    </ClCompile>
     <ClCompile Include="Classes\Collision\EPAclass.cpp">
       <Filter>Classes\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Interface\Object.cpp">
+      <Filter>Classes\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Interface\ObjectManager.cpp">
+      <Filter>Classes\Interface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
