@@ -1,10 +1,5 @@
 #include "Transform.h"
 
-Transform::Transform()
-    : m_position(0.f, 0.f, 0.f),
-      m_rotation(0.f, 0.f, 0.f, 1.f), 
-      m_scale   (1.f, 1.f, 1.f)
-{}
 
 /// @brief transform‚Ìposition‚ğ“ü—Í‚µ‚½’l‚É•ÏX‚µ‚Ü‚·
 void Transform::SetPosition(const SimpleMath::Vector3& pos) {

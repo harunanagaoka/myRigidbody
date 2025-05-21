@@ -9,7 +9,8 @@
 #include "Classes/CreateResources/PipelineManager.h"
 #include "Classes/CreateResources/CameraManager.h"
 #include "Classes/CreateResources/EffectManager.h"
-#include "Classes/Rigidbody.h"
+#include "Classes/RigidbodyManager.h"
+#include "Classes/Simulation/SimulationObject.h"
 
 using Microsoft::WRL::ComPtr;
 using std::unique_ptr;
@@ -50,15 +51,15 @@ private:
 	CameraManager m_camera;
 	EffectManager m_effectManager;
 
-	//ObjManager m_objManager;
+	RigidbodyManager m_rigidbodyManager;
 
-	//std::shared_ptr<Primitive> shape_;
+	SimulationObject m_obj;
+
 
 	float frameTimer = 0.0f;
 	int frameCount = 0;
 	float fps = 0.0f;
 
 	DirectXTK::GeometricPrimitive shape_;
-	Rigidbody rigidbody_;
 	bool m_aabbDirty = false;//true‚Ìê‡‚Ì‚İXV
 };

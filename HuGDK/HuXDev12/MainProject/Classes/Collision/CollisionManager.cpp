@@ -33,18 +33,18 @@ void CollisionManager::Clear() {
 
 void CollisionManager::ContactCheck() {
 
-	for (size_t i = 0; i < m_colliders.size(); ++i) {
-		//for (size_t j = i + 1; j < m_colliders.size(); ++j) {
-		//	CollisionDetection::ContactInfo info;
-		//	info = m_Detection.Collision(m_colliders[i], m_colliders[j]);
-		//	 Rigidbody* rb = m_colliders[i]->GetRigidBody();
-		//	 rb->ResolveCollision(info, true);
-		//	 Rigidbody* rbj =  m_colliders[j]->GetRigidBody();
-		//	 rbj->ResolveCollision(info, false);
+	//for (size_t i = 0; i < m_rigidbodyMap.size(); ++i) {
+	//	//for (size_t j = i + 1; j < m_colliders.size(); ++j) {
+	//	//	CollisionDetection::ContactInfo info;
+	//	//	info = m_Detection.Collision(m_colliders[i], m_colliders[j]);
+	//	//	 Rigidbody* rb = m_colliders[i]->GetRigidBody();
+	//	//	 rb->ResolveCollision(info, true);
+	//	//	 Rigidbody* rbj =  m_colliders[j]->GetRigidBody();
+	//	//	 rbj->ResolveCollision(info, false);
 
-		//	//ÚG”»’è
-		//}
-	}
+	//	//	//ÚG”»’è
+	//	//}
+	//}
 
 }
 

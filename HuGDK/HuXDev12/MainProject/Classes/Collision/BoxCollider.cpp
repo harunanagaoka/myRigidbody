@@ -43,7 +43,7 @@ SimpleMath::Vector3 BoxCollider::ComputeCenter() const {
 
 	if (sum == SimpleMath::Vector3::Zero)
 	{
-		return SimpleMath::Vector3::Zero;//ƒ[ƒ™Z‰ñ”ğ
+		return SimpleMath::Vector3::Zero;/*ƒ[ƒ™Z‰ñ”ğ*/
 	}
 
 	return sum / 8.0f;

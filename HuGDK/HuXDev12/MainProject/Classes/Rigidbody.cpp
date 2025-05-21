@@ -1,18 +1,22 @@
+//
+// Rigidbody.cpp
+//
+
 #include "Rigidbody.h"
 
-void Rigidbody::Update() {//FixedUpdate“à‚ÅŒÄ‚Ô—\’è
+void Rigidbody::Update() {
 
-	ComputeGravity(DXTK->Time.deltaTime);
 
-	SimpleMath::Vector3 nextPos = m_transform.GetPosition() + m_velocity;
+	m_solver.Update();
+	
 
-	m_transform.SetPosition(nextPos);
 }
 
-void Rigidbody::ComputeGravity(float dt) {
+void Rigidbody::ImpactResponse() {
+	//Õ“Ëinfo‚ð‚¤‚¯‚Æ‚èrigidbody‚Étransform‚Æˆê‚É“n‚·
 
-	if (m_isGravity)
-	{
-		m_velocity.y -= m_gravityAccelConst * m_gravityScale * dt;
-	}
+	//transform‚ÌXV‚ª‚ ‚ê‚Î”½‰f
+	m_collider->UpdateWorldVertices(m_transform.GetWorldMatrix());
+
+
 }

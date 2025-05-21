@@ -9,12 +9,14 @@
 
 class Transform {
 public:
-	Transform();
+    Transform() : m_position(0.f, 0.f, 0.f),
+        m_rotation(0.f, 0.f, 0.f, 1.f),
+        m_scale(1.f, 1.f, 1.f){}
 
     // Set
     void SetPosition(const SimpleMath::Vector3& pos);
     void SetRotationFromEuler(const  SimpleMath::Vector3& euler);
-    void SetRotationFromQuat(const  SimpleMath::Vector4& quat); // Quaternion
+    void SetRotationFromQuat(const  SimpleMath::Vector4& quat); 
     void SetScale(const SimpleMath::Vector3& scl);
 
     // Get

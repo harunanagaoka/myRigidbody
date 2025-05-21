@@ -1,35 +1,32 @@
 //
-//Rigidbody.h
-//èdóÕÇ∆è’ìÀâûìöÇtransformÇ…îΩâfÇ∑ÇÈ
+// Rigidbody.h
+//
 
 #pragma once
 
 #include "..\Base\pch.h"
 #include "..\Base\dxtk.h"
 #include "Transform.h"
-#include "Collision\BoxCollider.h"
+#include "Collision/Collider/PhysicsCollider.h"
+#include "PhysicsSolver.h"
 
-class Rigidbody{
+
+class Rigidbody {
 public:
+	Rigidbody(int id,ColliderType type,SimpleMath::Vector3 position):m_id(id) {
+		m_collider = new PhysicsCollider(type);
+		m_transform.SetPosition(position);
+	}
+
 	void Update();
+	void ImpactResponse();
 
-	void ComputeGravity(float dt);
-
-	const SimpleMath::Matrix& Draw() { return m_transform.GetWorldMatrix(); }
+	const DirectX::SimpleMath::Matrix GetWorldMatrix() const { return m_transform.GetWorldMatrix(); }
 
 private:
 	Transform m_transform;
+	PhysicsCollider* m_collider;
+	PhysicsSolver m_solver;
 
-	SimpleMath::Vector3 m_velocity = SimpleMath::Vector3::Zero;
-
-	//èdóÕ
-	bool m_isGravity = true;
-	float m_gravityScale = 1.0;
-	float m_mass = 0.5;
-	const float m_gravityAccelConst = 9.8;
-
-	
-	
+	int m_id = -1;
 };
-
-
