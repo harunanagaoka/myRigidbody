@@ -5,6 +5,7 @@
 BoxCollider::BoxCollider() {
 
 	m_localVertices = m_primitiveVertices;
+
 }
 
 BoxCollider::BoxCollider(SimpleMath::Vector3 size) {
@@ -31,4 +32,19 @@ void BoxCollider::UpdateWorldVertices(const SimpleMath::Matrix& worldMatrix) {
 
 		m_worldVertices[i] = SimpleMath::Vector3::Transform(m_localVertices[i], worldMatrix);
 	}
+}
+
+SimpleMath::Vector3 BoxCollider::ComputeCenter() const {
+	SimpleMath::Vector3 sum = SimpleMath::Vector3::Zero;
+
+	for (const auto& v : m_worldVertices) {
+		sum += v;
+	}
+
+	if (sum == SimpleMath::Vector3::Zero)
+	{
+		return SimpleMath::Vector3::Zero;//ƒ[ƒ™Z‰ñ”ğ
+	}
+
+	return sum / 8.0f;
 }

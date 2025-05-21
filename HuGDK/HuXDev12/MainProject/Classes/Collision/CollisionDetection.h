@@ -8,7 +8,7 @@
 #include "..\..\Base\dxtk.h"
 #include "BoxCollider.h"
 #include <array>
-
+#include <unordered_set>
 
 using namespace std;
 
@@ -16,6 +16,29 @@ constexpr size_t g_maxSimplexSize = 4;
 
 class CollisionDetection {
 public:
+	struct Vector3Hash
+	{
+		std::size_t operator()(const SimpleMath::Vector3& v) const noexcept
+		{
+			std::size_t hx = std::hash<float>{}(v.x);
+			std::size_t hy = std::hash<float>{}(v.y);
+			std::size_t hz = std::hash<float>{}(v.z);
+			return hx ^ (hy << 1) ^ (hz << 2);
+		}
+	};
+
+	struct Vector3Equal
+	{
+		bool operator()(const SimpleMath::Vector3& lhs, const SimpleMath::Vector3& rhs) const noexcept
+		{
+			constexpr float epsilon = 1e-6f;
+			return fabs(lhs.x - rhs.x) < epsilon &&
+				fabs(lhs.y - rhs.y) < epsilon &&
+				fabs(lhs.z - rhs.z) < epsilon;
+		}
+	};
+
+
 	struct PointInfo {
 		SimpleMath::Vector3 point;
 		SimpleMath::Vector3 supA, supB;
@@ -29,12 +52,22 @@ public:
 	};
 
 	struct ContactInfo {
+		bool hasValue = false;
 		SimpleMath::Vector3 contactPointA = SimpleMath::Vector3::Zero; 
 		SimpleMath::Vector3 contactPointB = SimpleMath::Vector3::Zero;
 		SimpleMath::Vector3 normal = SimpleMath::Vector3::Zero;        // 法線（A→B）
 		float penetrationDepth = 0;           // めり込み
 		SimpleMath::Vector3 tangent1 = SimpleMath::Vector3::Zero;     // 摩擦方向１
 		SimpleMath::Vector3 tangent2 = SimpleMath::Vector3::Zero;     // 摩擦方向２
+	};
+
+	ContactInfo Collision(const BoxCollider* collider_1, const BoxCollider* collider_2) {
+
+		ContactInfo info;
+		if (GJK(collider_1, collider_2, info)) {
+			return info;
+		}
+		return info;
 	};
 
 	size_t IndexOfFurthestPoint(const array<SimpleMath::Vector3, 8>& vertices,
@@ -47,7 +80,7 @@ public:
 
 	bool HandleTriangle(std::array<SimpleMath::Vector3, 4>& simplex, size_t& index, SimpleMath::Vector3& direction);
 	
-	bool GJK(const BoxCollider& collider_1,const BoxCollider& collider_2);
+	bool GJK(const BoxCollider* collider_1,const BoxCollider* collider_2, ContactInfo& info);
 
 	SimpleMath::Vector3 Support(const array<SimpleMath::Vector3, 8>& vertices_1, const array<SimpleMath::Vector3, 8>& vertices_2,  SimpleMath::Vector3& direction) {
 		PointInfo pointInfo;
@@ -64,10 +97,16 @@ public:
 		return pointInfo.point;
 	}
 
-	bool EPA(const BoxCollider& collider_1, const BoxCollider& collider_2,std::array<SimpleMath::Vector3, g_maxSimplexSize>& simplex)
+	bool IsDuplication(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, SimpleMath::Vector3 newPoint);
+
+	bool CheckDuplicationAndSet(unordered_set<SimpleMath::Vector3, Vector3Hash, Vector3Equal>& container, SimpleMath::Vector3& value);
+
+	bool SimplexHitTest(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t index);
+
+	ContactInfo EPA(const BoxCollider* collider_1, const BoxCollider* collider_2,array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, ContactInfo& info)
 	{
-		const array<SimpleMath::Vector3, 8> vertices_1 = collider_1.GetWorldVertices();
-		const array<SimpleMath::Vector3, 8> vertices_2 = collider_2.GetWorldVertices();
+		const array<SimpleMath::Vector3, 8> vertices_1 = collider_1->GetWorldVertices();
+		const array<SimpleMath::Vector3, 8> vertices_2 = collider_2->GetWorldVertices();
 
 		//GJKから受け取ったシンプレックスをvectorに移す（ポリトープ）
 		vector<SimpleMath::Vector3> polytope(simplex.begin(), simplex.end());
@@ -88,7 +127,8 @@ public:
 		minNormal = SimpleMath::Vector3(facesInfo[minFace].normal);//法線ベクトル
 		minDistance = facesInfo[minFace].distanceToOrigin;//距離
 
-		while (true) {//メインループ
+		int count = 0;
+		while (count++ < 50) {//メインループ
 
 			support = Support(vertices_1, vertices_2, facesInfo[minFace].normal);
 
@@ -129,6 +169,9 @@ public:
 				newFaceInfo.indexA = polytope[edgeIndex1];
 				newFaceInfo.indexB = polytope[edgeIndex2];
 				newFaceInfo.indexC = polytope[supportIndex];
+				newFaceInfo.Anum = edgeIndex1;
+				newFaceInfo.Bnum = edgeIndex2;
+				newFaceInfo.Cnum = supportIndex;
 				newFacesInfo.push_back(newFaceInfo);
 				faces.push_back(edgeIndex1);
 				faces.push_back(edgeIndex2);
@@ -175,7 +218,6 @@ public:
 		//★FaceInfo[minFace]を渡す
 		ComputeBarycentric(facesInfo[minFace], contactPointA, contactPointB);
 
-		ContactInfo info;
 		info.contactPointA = contactPointA;
 		info.contactPointB = contactPointB;
 		info.tangent1 = tangent1;
@@ -186,13 +228,13 @@ public:
 		//めりこむ場合は上記を入れてみる
 
 		//今はfalseを返してるけど衝突情報の構造体を返す予定
-		return false;
+		return info;
 	}
 
 	void ComputeBarycentric(FaceInfo minFace,SimpleMath::Vector3& contactPointA, SimpleMath::Vector3& contactPointB)
 	{
 		//求め方
-// 三角形 A, B, C と、内部の点 P に対して：
+		// 三角形 A, B, C と、内部の点 P に対して：
 
 		PointInfo& pA = m_polytope[minFace.Anum];
 		PointInfo& pB = m_polytope[minFace.Bnum];
@@ -275,7 +317,7 @@ public:
 		for (size_t i = 0; i < faces.size(); i += 3) {
 
 			FaceInfo faceInfo;
-			facesInfo.push_back(faceInfo);
+			
 
 			SimpleMath::Vector3 a = faceInfo.indexA = polytope[faces[i]];
 			faceInfo.Anum = faces[i];
@@ -287,11 +329,20 @@ public:
 			faceInfo.Cnum = faces[i + 2];
 			//ここのabcのインデックスを保持する（vectorで保存するか迷っとる）
 
-			SimpleMath::Vector3 normal = (b - a).Cross(c - a);
+			SimpleMath::Vector3 ab = b - a;
+			SimpleMath::Vector3 ac = c - a;
+			SimpleMath::Vector3 normal = ab.Cross(ac);
+
+			// 長さゼロ＝面積ゼロの三角形
+			if (normal.LengthSquared() < 1e-6f) {
+				continue; // ← このfaceは無効としてスキップ
+			}
+
 			normal.Normalize();
+
 			faceInfo.normal = normal;
 
-			float distance = normal.Dot(a);
+			float distance = normal.Dot(a);//原点（0,0,0）から法線方向に見た距離
 
 			if (distance < 0) {
 				normal *= -1;
@@ -305,6 +356,9 @@ public:
 				minTriangle = i / 3;
 				minDistance = distance;
 			}
+
+			faceInfo.normal = normal;
+			facesInfo.push_back(faceInfo);
 		}
 
 		return minTriangle;

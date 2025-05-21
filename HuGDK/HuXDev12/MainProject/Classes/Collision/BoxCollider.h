@@ -22,17 +22,17 @@ public:
 
     const array<SimpleMath::Vector3, 8> GetWorldVertices() const { return m_worldVertices; }
 
-    SimpleMath::Vector3 ComputeCenter() const {
-        SimpleMath::Vector3 sum = SimpleMath::Vector3::Zero;
+    //void SetRigidBody(Rigidbody* rb) { m_rb = rb; }
 
-        for (const auto& v : m_worldVertices) {
-            sum += v;
-        }
-        
-        return sum / 8.0f;
-    }
+    // Rigidbody* GetRigidBody() { return m_rb; }
+
+   // void AffectRigidbody(BoxCollider colliderB)  { m_rb.Collide(); }
+
+    SimpleMath::Vector3 ComputeCenter() const;
 
 private:
+    //Rigidbody* m_rb;
+
     SimpleMath::Vector3 m_localSize = SimpleMath::Vector3(1.0f, 1.0f, 1.0f); // コライダーのローカルサイズ
      
     array<SimpleMath::Vector3, 8> m_localVertices;// ローカル頂点 
