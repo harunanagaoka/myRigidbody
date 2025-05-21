@@ -51,7 +51,7 @@ void MainScene::CreateDeviceDependentResources()
 	m_camera.Initialize();
 	m_effectManager.Initialize();
 
-	shape_ = GeometricPrimitive::CreateTeapot();
+	shape_ = GeometricPrimitive::CreateTetrahedron();//描画用プリミティブ生成
 
 }
 
@@ -70,8 +70,6 @@ void MainScene::Initialize()
 	m_camera.Get().SetPerspectiveFieldOfView(
 		Mathf::PI / 4.0f,(float)DXTK->SwapChain.Width / (float)DXTK->SwapChain.Height,
 		0.1f, 10000.0f);
-
-	
 }
 
 // Releasing resources required for termination.
@@ -99,13 +97,14 @@ void MainScene::OnRestartSound()
 {
 
 }
-static std::random_device rd;                         // シード（ハードウェアベース乱数）
-static std::mt19937 gen(rd());                        // メルセンヌ・ツイスタ（乱数エンジン）
+//static std::random_device rd;                         // シード（ハードウェアベース乱数）
+//static std::mt19937 gen(rd());                        // メルセンヌ・ツイスタ（乱数エンジン）
 
 // Updates the scene.
 NextScene MainScene::Update(const float deltaTime)
 {
 	rigidbody_.Update();
+	//ここにオブジェクト更新のやつ
 
 	return NextScene::Continue;
 }
@@ -129,8 +128,6 @@ void MainScene::Render()
 	//effect->SetWorld(rigidbody_.Draw());//rigidbodyからマトリクスを受け取るかどうかは要検討
 	effect->Apply(commandList);
 	shape_->Draw(commandList);
-
-
 
 	DXTK->EndScene();
 
