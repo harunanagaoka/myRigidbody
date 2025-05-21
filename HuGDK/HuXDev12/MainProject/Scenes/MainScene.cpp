@@ -51,7 +51,7 @@ void MainScene::CreateDeviceDependentResources()
 	m_camera.Initialize();
 	m_effectManager.Initialize();
 
-	shape_ = GeometricPrimitive::CreateTetrahedron();//描画用プリミティブ生成
+	m_obj.SetShape();
 
 }
 
@@ -70,6 +70,10 @@ void MainScene::Initialize()
 	m_camera.Get().SetPerspectiveFieldOfView(
 		Mathf::PI / 4.0f,(float)DXTK->SwapChain.Width / (float)DXTK->SwapChain.Height,
 		0.1f, 10000.0f);
+
+
+	m_obj.SetRigidbody(m_rigidbodyManager.AddRigidbody(ColliderType::Tetrahedron,SimpleMath::Vector3
+	::Zero));
 }
 
 // Releasing resources required for termination.
@@ -103,8 +107,7 @@ void MainScene::OnRestartSound()
 // Updates the scene.
 NextScene MainScene::Update(const float deltaTime)
 {
-	rigidbody_.Update();
-	//ここにオブジェクト更新のやつ
+	m_rigidbodyManager.UpdateAll();
 
 	return NextScene::Continue;
 }
@@ -125,9 +128,7 @@ void MainScene::Render()
 	effect->SetView(camera.GetViewMatrix());
 	effect->SetProjection(camera.GetProjectionMatrix());
 
-	//effect->SetWorld(rigidbody_.Draw());//rigidbodyからマトリクスを受け取るかどうかは要検討
-	effect->Apply(commandList);
-	shape_->Draw(commandList);
+	m_obj.Render(effect);
 
 	DXTK->EndScene();
 

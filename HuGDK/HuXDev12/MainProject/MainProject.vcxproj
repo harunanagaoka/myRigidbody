@@ -203,6 +203,8 @@
     <ClInclude Include="Base\wiGamepad\wiVector.h" />
     <ClInclude Include="Base\wiGamepad\wiXInput.h" />
     <ClInclude Include="Classes\Collision\BoxCollider.h" />
+    <ClInclude Include="Classes\Collision\Collider\PhysicsCollider.h" />
+    <ClInclude Include="Classes\Collision\Collider\TetrahedronCollider.h" />
     <ClInclude Include="Classes\Collision\CollisionDetection.h" />
     <ClInclude Include="Classes\Collision\CollisionManager.h" />
     <ClInclude Include="Classes\Collision\EPAclass.h" />
@@ -212,8 +214,10 @@
     <ClInclude Include="Classes\CreateResources\ShaderManager.h" />
     <ClInclude Include="Classes\ObjManager.h" />
     <ClInclude Include="Classes\OriginalGeometric.h" />
+    <ClInclude Include="Classes\PhysicsSolver.h" />
     <ClInclude Include="Classes\Rigidbody.h" />
-    <ClInclude Include="Classes\RigidbodyOld.h" />
+    <ClInclude Include="Classes\RigidbodyManager.h" />
+    <ClInclude Include="Classes\Simulation\SimulationObject.h" />
     <ClInclude Include="Classes\Transform.h" />
     <ClInclude Include="Scenes\DontDestroyOnLoad.h" />
     <ClInclude Include="Scenes\MainScene.h" />
@@ -240,6 +244,7 @@
     <ClCompile Include="Base\wiGamepad\wiRawGamepad.cpp" />
     <ClCompile Include="Base\wiGamepad\wiXInput.cpp" />
     <ClCompile Include="Classes\Collision\BoxCollider.cpp" />
+    <ClCompile Include="Classes\Collision\Collider\TetrahedronCollider.cpp" />
     <ClCompile Include="Classes\Collision\CollisionDetection.cpp" />
     <ClCompile Include="Classes\Collision\CollisionManager.cpp" />
     <ClCompile Include="Classes\Collision\EPAclass.cpp" />
@@ -248,8 +253,10 @@
     <ClCompile Include="Classes\CreateResources\PipelineManager.cpp" />
     <ClCompile Include="Classes\CreateResources\ShaderManager.cpp" />
     <ClCompile Include="Classes\OriginalGeometric.cpp" />
+    <ClCompile Include="Classes\PhysicsSolver.cpp" />
     <ClCompile Include="Classes\Rigidbody.cpp" />
-    <ClCompile Include="Classes\RigidbodyOld.cpp" />
+    <ClCompile Include="Classes\RigidbodyManager.cpp" />
+    <ClCompile Include="Classes\Simulation\SimulationObject.cpp" />
     <ClCompile Include="Classes\Transform.cpp" />
     <ClCompile Include="Scenes\MainScene.cpp" />
   </ItemGroup>
