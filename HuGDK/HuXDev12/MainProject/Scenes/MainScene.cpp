@@ -51,7 +51,8 @@ void MainScene::CreateDeviceDependentResources()
 	m_camera.Initialize();
 	m_effectManager.Initialize();
 
-	shape_ = MyGeometory::Primitive::CreateCubePrimitive(5, device);
+	m_obj.SetShape();
+	m_objB.SetShape();
 
 }
 
@@ -71,8 +72,12 @@ void MainScene::Initialize()
 		Mathf::PI / 4.0f,(float)DXTK->SwapChain.Width / (float)DXTK->SwapChain.Height,
 		0.1f, 10000.0f);
 
-	//m_objManager.AddObject(1, SimpleMath::Vector3(0, 0, 0), false);
-	
+	Rigidbody* rb = m_rigidbodyManager.AddRigidbody(ColliderType::Tetrahedron, SimpleMath::Vector3::Zero);
+	rb->SetStatic(true);
+	m_obj.SetRigidbody(rb);
+
+	rb = m_rigidbodyManager.AddRigidbody(ColliderType::Tetrahedron, SimpleMath::Vector3(0, 5, 0));
+	m_objB.SetRigidbody(rb);
 }
 
 // Releasing resources required for termination.
@@ -92,7 +97,7 @@ void MainScene::Terminate()
 // Direct3D resource cleanup.
 void MainScene::OnDeviceLost()
 {
-	shape_.reset();
+
 }
 
 // Restart any looped sounds here
@@ -100,23 +105,13 @@ void MainScene::OnRestartSound()
 {
 
 }
-static std::random_device rd;                         // シード（ハードウェアベース乱数）
-static std::mt19937 gen(rd());                        // メルセンヌ・ツイスタ（乱数エンジン）
+//static std::random_device rd;                         // シード（ハードウェアベース乱数）
+//static std::mt19937 gen(rd());                        // メルセンヌ・ツイスタ（乱数エンジン）
 
 // Updates the scene.
 NextScene MainScene::Update(const float deltaTime)
 {
-
-	if (InputSystem.Mouse.was.leftButton == InputSystem.Mouse.was.PRESSED)
-	{
-		std::uniform_real_distribution<float> distX(-5.0f, 10.0f);
-		std::uniform_real_distribution<float> distY(5.0f, 10.0f);
-		float x = distX(gen);
-		float y = distY(gen);
-		m_objManager.AddObject(1,SimpleMath::Vector3(x,y,0),true);
-	}
-
-	m_objManager.UpdateAll();
+	m_rigidbodyManager.UpdateAll();
 
 	return NextScene::Continue;
 }
@@ -136,7 +131,9 @@ void MainScene::Render()
 
 	effect->SetView(camera.GetViewMatrix());
 	effect->SetProjection(camera.GetProjectionMatrix());
-	m_objManager.DrawAll(effect.get());
+
+	m_obj.Render(effect);
+	m_objB.Render(effect);
 
 	DXTK->EndScene();
 

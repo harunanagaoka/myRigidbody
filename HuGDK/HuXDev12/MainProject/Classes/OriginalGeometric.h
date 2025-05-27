@@ -20,7 +20,7 @@ namespace MyGeometory
 	struct MyVertex//頂点の構造体
 	{
 		DirectX::XMFLOAT3 position;
-		DirectX::XMFLOAT3 normal;
+		DirectX::XMFLOAT3 normal;//normal vector(法線ベクトル)
 
 		static const D3D12_INPUT_ELEMENT_DESC InputElements[2];
 		static const D3D12_INPUT_LAYOUT_DESC InputLayout;

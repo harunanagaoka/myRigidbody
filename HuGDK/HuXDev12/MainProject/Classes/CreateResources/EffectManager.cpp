@@ -26,4 +26,5 @@ void EffectManager::Initialize()
 	m_shaderEffect->SetLightEnabled(0, true);
 	m_shaderEffect->SetLightDiffuseColor(0, Colors::White);
 	m_shaderEffect->SetLightDirection(0, DirectX::SimpleMath::Vector3::UnitZ);
+
 }

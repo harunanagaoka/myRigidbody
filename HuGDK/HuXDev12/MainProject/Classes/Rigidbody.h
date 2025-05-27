@@ -1,72 +1,37 @@
-///Rigidbody.h
+//
+// Rigidbody.h
+//
 
 #pragma once
 
-#include <wrl/client.h> 
-#include <cstddef>
-#include <cstdint>
-#include <memory>
-#include <vector>
-#include "OriginalGeometric.h"
+#include "..\Base\pch.h"
+#include "..\Base\dxtk.h"
+#include "Transform.h"
+#include "Collision/Collider/PhysicsCollider.h"
+#include "PhysicsSolver.h"
 
-using namespace MyGeometory;
 
 class Rigidbody {
 public:
-    bool isGravity = true;
+	Rigidbody(int id,ColliderType type, PhysicsCollider* collider,SimpleMath::Vector3 position):m_id(id) , m_collider(collider) {
+		//m_collider = new TetrahedronCollider(type);
+	
+		m_transform.SetPosition(position);
+	}
 
-    float ground = -3.5;
-    bool isGround = false;
-    bool isBound = false;
+	void Update();
+	void ImpactResponse();
 
-    float mass = 0.5;
-    SimpleMath::Vector3 velocity;
-    SimpleMath::Vector3 acceleration;
-    SimpleMath::Vector3 position;
-    SimpleMath::Vector3 initPos;//ç≈èâÇÃÉ|ÉWÉVÉáÉì
-    SimpleMath::Vector3 m_halfExtents;
-    SimpleMath::Vector3 forceAccum;
-    SimpleMath::Vector3 correction;
-    float hanpatsu = 0.6;
+	void UseGravity(bool use) { m_solver.UseGravity(use); }
+	void SetStatic(bool isStatic) { m_solver.SetStatic(isStatic); }
 
-    SimpleMath::Matrix m_matrix;
-    std::shared_ptr<Primitive> shape;
-
-    Rigidbody(std::shared_ptr<Primitive> primitive, SimpleMath::Matrix matrix,SimpleMath::Vector3 pos,bool useGravity);//ID3D12Device device
-
-    void Update();
-
-    void ApplyForce(const SimpleMath::Vector3& force) {
-        forceAccum += force;
-    }
-
-    void ApplyCollision();
-
-    void ApplyCorrection(SimpleMath::Vector3& correct) {
-        position += correct;
-    };
-
-    bool IsGravity() { return isGravity; };
-
-    SimpleMath::Vector3 GetPos() { return position; };
-
-    SimpleMath::Vector3 GetInitPos() { return initPos; };
-
-    SimpleMath::Vector3 GetAABB() { return m_halfExtents; };
-
-    SimpleMath::Vector3 ComputeCenterFromVertices(const std::vector<MyVertex>& vertices);
-
-    SimpleMath::Vector3 ComputeHalfExtentsFromVertices(const std::vector<MyVertex>& vertices);
-
-    SimpleMath::Matrix GetWorldMatrix() const {
-        return SimpleMath::Matrix::CreateTranslation(position);
-    }
-
-    
-    
-    
-    
+	const DirectX::SimpleMath::Matrix GetWorldMatrix() const { return m_transform.GetWorldMatrix(); }
+	PhysicsCollider* GetCollider() const { return m_collider; }
 
 private:
-};
+	Transform m_transform;
+	PhysicsCollider* m_collider;
+	PhysicsSolver m_solver;
 
+	int m_id = -1;
+};
