@@ -11,21 +11,25 @@
 
 class PhysicsSolver{
 public:
-	void Update();
+	void Update(Transform& transform);
 
 	void ComputeGravity(float dt);
 
-	const SimpleMath::Matrix& Draw() { return m_transform.GetWorldMatrix(); }
+	void UseGravity(bool use) { m_isGravity = use; }
+
+	void SetStatic(bool isStatic) { m_isStatic = isStatic; }
+
 
 private:
-	Transform m_transform;
 
 	SimpleMath::Vector3 m_velocity = SimpleMath::Vector3::Zero;
+
+	bool m_isStatic = false;
 
 	//èdóÕ
 	bool m_isGravity = true;
 	float m_gravityScale = 1.0;
-	float m_mass = 0.5;
+	float m_mass = 1.0;
 	const float m_gravityAccelConst = 9.8;
 
 	

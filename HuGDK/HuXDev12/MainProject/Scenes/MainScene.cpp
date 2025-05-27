@@ -52,6 +52,7 @@ void MainScene::CreateDeviceDependentResources()
 	m_effectManager.Initialize();
 
 	m_obj.SetShape();
+	m_objB.SetShape();
 
 }
 
@@ -71,9 +72,12 @@ void MainScene::Initialize()
 		Mathf::PI / 4.0f,(float)DXTK->SwapChain.Width / (float)DXTK->SwapChain.Height,
 		0.1f, 10000.0f);
 
+	Rigidbody* rb = m_rigidbodyManager.AddRigidbody(ColliderType::Tetrahedron, SimpleMath::Vector3::Zero);
+	rb->SetStatic(true);
+	m_obj.SetRigidbody(rb);
 
-	m_obj.SetRigidbody(m_rigidbodyManager.AddRigidbody(ColliderType::Tetrahedron,SimpleMath::Vector3
-	::Zero));
+	rb = m_rigidbodyManager.AddRigidbody(ColliderType::Tetrahedron, SimpleMath::Vector3(0, 5, 0));
+	m_objB.SetRigidbody(rb);
 }
 
 // Releasing resources required for termination.
@@ -129,6 +133,7 @@ void MainScene::Render()
 	effect->SetProjection(camera.GetProjectionMatrix());
 
 	m_obj.Render(effect);
+	m_objB.Render(effect);
 
 	DXTK->EndScene();
 

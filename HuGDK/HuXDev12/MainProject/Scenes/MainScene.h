@@ -10,7 +10,9 @@
 #include "Classes/CreateResources/CameraManager.h"
 #include "Classes/CreateResources/EffectManager.h"
 #include "Classes/RigidbodyManager.h"
+#include "Classes/Rigidbody.h"
 #include "Classes/Simulation/SimulationObject.h"
+#include "Classes/Resistry/PhysicsTypes.h"
 
 using Microsoft::WRL::ComPtr;
 using std::unique_ptr;
@@ -55,11 +57,11 @@ private:
 
 	SimulationObject m_obj;
 
+	SimulationObject m_objB;
 
 	float frameTimer = 0.0f;
 	int frameCount = 0;
 	float fps = 0.0f;
 
-	DirectXTK::GeometricPrimitive shape_;
 	bool m_aabbDirty = false;//trueÇÃèÍçáÇÃÇ›çXêV
 };

@@ -28,11 +28,14 @@
     <Filter Include="Classes\Physics">
       <UniqueIdentifier>{75ee9250-a921-4fe5-966e-53e5422597cd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Classes\Physics\Collider">
-      <UniqueIdentifier>{67d23b97-2a57-4533-a4f1-413ec34264eb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Classes\Simulation">
       <UniqueIdentifier>{afa4480f-aaac-41ad-b4c3-c04d5ade8d64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Resistry">
+      <UniqueIdentifier>{64ca4538-efcd-468f-b0a3-0ea0b1f8a0ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Physics\Collider">
+      <UniqueIdentifier>{67d23b97-2a57-4533-a4f1-413ec34264eb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -135,9 +138,6 @@
     <ClInclude Include="Classes\Collision\CollisionManager.h">
       <Filter>Classes\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\Collision\EPAclass.h">
-      <Filter>Classes\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="Classes\Collision\Collider\PhysicsCollider.h">
       <Filter>Classes\Physics\Collider</Filter>
     </ClInclude>
@@ -151,6 +151,21 @@
       <Filter>Classes\Simulation</Filter>
     </ClInclude>
     <ClInclude Include="Classes\Collision\Collider\TetrahedronCollider.h">
+      <Filter>Classes\Physics\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Resistry\PhysicsTypes.h">
+      <Filter>Classes\Resistry</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\CollisionSupport.h">
+      <Filter>Classes\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\EPASolver.h">
+      <Filter>Classes\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\GJKSolver.h">
+      <Filter>Classes\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\Collider\PhysicsColliderFactory.h">
       <Filter>Classes\Physics\Collider</Filter>
     </ClInclude>
   </ItemGroup>
@@ -212,9 +227,6 @@
     <ClCompile Include="Classes\Collision\CollisionManager.cpp">
       <Filter>Classes\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\Collision\EPAclass.cpp">
-      <Filter>Classes\Physics</Filter>
-    </ClCompile>
     <ClCompile Include="Classes\Rigidbody.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
@@ -226,6 +238,15 @@
     </ClCompile>
     <ClCompile Include="Classes\Collision\Collider\TetrahedronCollider.cpp">
       <Filter>Classes\Physics\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Collision\EPASolver.cpp">
+      <Filter>Classes\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Collision\GJKSolver.cpp">
+      <Filter>Classes\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Collision\CollisionSupport.cpp">
+      <Filter>Classes\Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

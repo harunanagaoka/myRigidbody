@@ -6,7 +6,9 @@
 
 Rigidbody* RigidbodyManager::AddRigidbody(ColliderType type, SimpleMath::Vector3 position) {
 	static int id = 0;
-	Rigidbody* rb = new Rigidbody(id,type, position);
+	
+	PhysicsCollider* collider = m_colliderFactory.CreateCollider(type);
+	Rigidbody* rb = new Rigidbody(id,type, collider,position);
 	m_rigidbodyMap[id] = rb;
 	id++;
 
@@ -22,17 +24,16 @@ void RigidbodyManager::CheckCollision() {
 
 		for (; it2 != m_rigidbodyMap.end(); ++it2) {
 
-			CollisionDetection::ContactInfo info;
-
 			Rigidbody* rb1 = it1->second;
 			Rigidbody* rb2 = it2->second;
 
-			//if(m_detector.Collision(rb1,rb2,info;))
-			rb1->ImpactResponse();
-			rb2->ImpactResponse();
+			ContactInfo info = m_detector.DetectCollision(rb1, rb2);
+			
+			if (info.hasValue) {/* hasValue -> 衝突あり */
+				rb1->ImpactResponse();
+				rb2->ImpactResponse();
+			}
 
-			// ここで rb1 と rb2 のペアに対する処理を書くケロ！
-			// 例: 衝突チェックや距離計算など
 		}
 	}
 
@@ -40,12 +41,13 @@ void RigidbodyManager::CheckCollision() {
 
 void RigidbodyManager::UpdateAll() {
 
-	CheckCollision();
-
 	for (auto& pair : m_rigidbodyMap) {
 
 		if (pair.second != nullptr) {
 			pair.second->Update();
 		}
 	}
+
+	CheckCollision();
+
 }

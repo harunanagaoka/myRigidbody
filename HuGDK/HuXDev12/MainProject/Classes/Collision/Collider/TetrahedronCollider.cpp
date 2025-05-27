@@ -5,7 +5,7 @@
 #include "TetrahedronCollider.h"
 
 /*worldVertexXVŒã‚ÉŒÄ‚Ô‚±‚Æ*/
-SimpleMath::Vector3 TetrahedronCollider::ComputeCenter() {
+SimpleMath::Vector3 TetrahedronCollider::ComputeCenter() const {
 
 	
 	SimpleMath::Vector3 center = SimpleMath::Vector3::Zero;

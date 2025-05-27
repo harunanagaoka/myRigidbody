@@ -1,12 +1,17 @@
 #include "PhysicsSolver.h"
 
-void PhysicsSolver::Update() {//FixedUpdate“à‚ÅŒÄ‚Ô—\’è
+void PhysicsSolver::Update(Transform& transform) {//FixedUpdate“à‚ÅŒÄ‚Ô—\’è
+
+	if (m_isStatic)
+	{
+		return;
+	}
 
 	ComputeGravity(DXTK->Time.deltaTime);
 
-	SimpleMath::Vector3 nextPos = m_transform.GetPosition() + m_velocity;
+	SimpleMath::Vector3 nextPos = transform.GetPosition() + m_velocity * DXTK->Time.deltaTime;
 
-	m_transform.SetPosition(nextPos);
+	transform.SetPosition(nextPos);
 }
 
 void PhysicsSolver::ComputeGravity(float dt) {

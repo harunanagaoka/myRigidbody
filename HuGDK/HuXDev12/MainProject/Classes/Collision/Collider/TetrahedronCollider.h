@@ -7,6 +7,7 @@
 #include "..\..\..\Base\pch.h"
 #include "..\..\..\Base\dxtk.h"
 #include "PhysicsCollider.h"
+#include "..\..\Resistry\PhysicsTypes.h"
 #include <array>
 
 class TetrahedronCollider : public PhysicsCollider{
@@ -17,7 +18,7 @@ public:
         m_localVertices.assign(m_primitiveVertices.begin(), m_primitiveVertices.end());
 	}
 
-    SimpleMath::Vector3 ComputeCenter() override;
+    SimpleMath::Vector3 ComputeCenter() const  override;
     
 
 private:

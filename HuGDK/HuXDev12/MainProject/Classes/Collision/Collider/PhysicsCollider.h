@@ -7,32 +7,36 @@
 #include "..\..\..\Base\pch.h"
 #include "..\..\..\Base\dxtk.h"
 #include "..\..\Transform.h"
+#include "..\..\Resistry\PhysicsTypes.h"
 
 using namespace std;
 
-enum class ColliderType {/*そのうちクラスに分離する*/
-	Tetrahedron,
-	Error
-};
+
 
 class PhysicsCollider {
  public:
-	 PhysicsCollider(ColliderType type) :m_type(type) {}
+	 PhysicsCollider() = default;
+	 PhysicsCollider(ColliderType type) :m_type(type) {
+	 
+
+	 }
 	 virtual ~PhysicsCollider() = default;
 
 	 /// @brief ローカル頂点をワールド頂点に変換します。
 	 /// @warning Transformの値が変わったら呼び出すこと。
 	 void UpdateWorldVertices(const SimpleMath::Matrix& worldMatrix) {
 	 
+		 m_worldVertices.resize(m_localVertices.size());
+
 		 for (int i = 0; i < m_localVertices.size(); ++i) {
 
 			 m_worldVertices[i] = SimpleMath::Vector3::Transform(m_localVertices[i], worldMatrix);
 		 }
 	 };
 
-	 vector<SimpleMath::Vector3> GetWorldVertices() { return m_worldVertices; }
+	 const vector<SimpleMath::Vector3> GetWorldVertices() const { return m_worldVertices; }
 
-	 virtual SimpleMath::Vector3 ComputeCenter() { return SimpleMath::Vector3::Zero; };
+	 virtual SimpleMath::Vector3 ComputeCenter() const { return SimpleMath::Vector3::Zero; };
 	 
 protected:
 	ColliderType m_type = ColliderType::Error;
