@@ -35,7 +35,7 @@ namespace CollisionSupport {
 	/// <param name="vertices_A">図形Aの頂点データ</param>
 	/// <param name="vertices_B">図形Bの頂点データ</param>
 	/// <param name="direction">探索方向</param>
-	SimpleMath::Vector3 Support(const vector<SimpleMath::Vector3>& vertices_A, const vector<SimpleMath::Vector3>& vertices_B, SimpleMath::Vector3& direction) {
+	PointInfo Support(const vector<SimpleMath::Vector3>& vertices_A, const vector<SimpleMath::Vector3>& vertices_B, SimpleMath::Vector3& direction) {
 		PointInfo pointInfo;
 
 		size_t i = IndexOfFurthestPoint(vertices_A, direction);
@@ -47,7 +47,7 @@ namespace CollisionSupport {
 		pointInfo.point = pointInfo.supA - pointInfo.supB;
 		//m_polytope.push_back(pointInfo);
 
-		return pointInfo.point;
+		return pointInfo;
 	}
 
 	/// <summary>

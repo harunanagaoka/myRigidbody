@@ -16,12 +16,12 @@ public:
     // Set
     void SetPosition(const SimpleMath::Vector3& pos);
     void SetRotationFromEuler(const  SimpleMath::Vector3& euler);
-    void SetRotationFromQuat(const  SimpleMath::Vector4& quat); 
+    void SetRotationFromQuat(const  SimpleMath::Quaternion& quat);
     void SetScale(const SimpleMath::Vector3& scl);
 
     // Get
     const SimpleMath::Vector3& GetPosition() const { return m_position; }
-    const  SimpleMath::Vector4& GetRotation() const { return m_rotation; }
+    const  SimpleMath::Quaternion& GetRotation() const { return m_rotation; }
     const SimpleMath::Vector3& GetScale() const { return m_scale; }
 
     /// @brief 現在のtransformの値に応じたワールド行列を返します。
@@ -34,7 +34,7 @@ public:
 
 private :
      SimpleMath::Vector3 m_position;
-     SimpleMath::Vector4 m_rotation;
+     SimpleMath::Quaternion m_rotation;
      SimpleMath::Vector3 m_scale;
 
      mutable SimpleMath::Matrix  m_worldMatrix;

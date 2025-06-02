@@ -65,18 +65,18 @@ void MainScene::CreateResources()
 void MainScene::Initialize()
 {
 
-	m_camera.Get().SetViewLookAt(Vector3(0.0f, 0.0f, -20), Vector3::Zero, Vector3::UnitY);
+	m_camera.Get().SetViewLookAt(Vector3(0.0f, 0.0f, -10), Vector3::Zero, Vector3::UnitY);
 	//カメラの設置（カメラを置く座標,目標の座標（向き）,カメラのy軸方向）
 
 	m_camera.Get().SetPerspectiveFieldOfView(
 		Mathf::PI / 4.0f,(float)DXTK->SwapChain.Width / (float)DXTK->SwapChain.Height,
 		0.1f, 10000.0f);
 
-	Rigidbody* rb = m_rigidbodyManager.AddRigidbody(ColliderType::Tetrahedron, SimpleMath::Vector3::Zero);
+	Rigidbody* rb = m_rigidbodyManager.AddRigidbody(ColliderType::Tetrahedron, SimpleMath::Vector3(0, 0, 0));
 	rb->SetStatic(true);
 	m_obj.SetRigidbody(rb);
 
-	rb = m_rigidbodyManager.AddRigidbody(ColliderType::Tetrahedron, SimpleMath::Vector3(0, 5, 0));
+	rb = m_rigidbodyManager.AddRigidbody(ColliderType::Tetrahedron, SimpleMath::Vector3(0, 2, 0));
 	m_objB.SetRigidbody(rb);
 }
 

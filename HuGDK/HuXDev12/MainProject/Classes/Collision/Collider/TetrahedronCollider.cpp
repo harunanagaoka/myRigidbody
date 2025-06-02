@@ -18,3 +18,15 @@ SimpleMath::Vector3 TetrahedronCollider::ComputeCenter() const {
 
 	return center;
 }
+
+void TetrahedronCollider::ComputeInertiaTensor() {
+
+	// 正四面体の慣性テンソル対角要素（原点中心、各軸対称）
+	float inertia = m_mass * 1.6f; //（近似値）
+
+	m_inertiaTensorLocal = SimpleMath::Matrix::Identity;
+	m_inertiaTensorLocal._11 = inertia;
+	m_inertiaTensorLocal._22 = inertia;
+	m_inertiaTensorLocal._33 = inertia;
+
+}
