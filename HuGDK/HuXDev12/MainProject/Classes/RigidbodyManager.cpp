@@ -24,14 +24,14 @@ void RigidbodyManager::CheckCollision() {
 
 		for (; it2 != m_rigidbodyMap.end(); ++it2) {
 
-			Rigidbody* rb1 = it1->second;
-			Rigidbody* rb2 = it2->second;
+			Rigidbody* rbA = it1->second;
+			Rigidbody* rbB = it2->second;
 
-			ContactInfo info = m_detector.DetectCollision(rb1, rb2);
+			ContactInfo info = m_detector.DetectCollision(rbA, rbB);
 			
 			if (info.hasValue) {/* hasValue -> Õ“Ë‚ ‚è */
-				rb1->ImpactResponse();
-				rb2->ImpactResponse();
+				rbA->ImpactResponse(rbB, info, true);
+				rbB->ImpactResponse(rbA,info,false);
 			}
 
 		}

@@ -1,23 +1,26 @@
 #include "PhysicsSolver.h"
 
-void PhysicsSolver::Update(Transform& transform) {//FixedUpdate内で呼ぶ予定
+void PhysicsSolver::Update(Transform& transform) {
+	//UpdateはRIgidbodyにまとめる
+	//if (m_isStatic)
+	//{
+	//	return;
+	//}
 
-	if (m_isStatic)
-	{
-		return;
-	}
-
-	ComputeGravity(DXTK->Time.deltaTime);
-
-	SimpleMath::Vector3 nextPos = transform.GetPosition() + m_velocity * DXTK->Time.deltaTime;
-
-	transform.SetPosition(nextPos);
 }
 
-void PhysicsSolver::ComputeGravity(float dt) {
+/// <summary>
+/// 重力を計算してpositionに適用します。
+/// </summary>
+/// <param name="transform">オブジェクトが所持するTransform</param>
+/// <param name="gravityScale">重力の大きさ</param>
+SimpleMath::Vector3 PhysicsSolver::ComputeGravity(const SimpleMath::Vector3& position, SimpleMath::Vector3& velocity, const float gravityScale) {
 
-	if (m_isGravity)
-	{
-		m_velocity.y -= m_gravityAccelConst * m_gravityScale * dt;
-	}
+	SimpleMath::Vector3 nextPos = position + velocity * DXTK->Time.deltaTime;
+
+	velocity.y -= m_gravityAccelConst * gravityScale * DXTK->Time.deltaTime;
+
+	return nextPos;
+	//transform.SetPosition(nextPos);
+
 }

@@ -8,7 +8,7 @@ void Transform::SetPosition(const SimpleMath::Vector3& pos) {
 }
 
 /// @brief 入力したクォータニオンをrotationに反映します。
-void Transform::SetRotationFromQuat(const SimpleMath::Vector4& quat) {
+void Transform::SetRotationFromQuat(const SimpleMath::Quaternion& quat) {
     m_rotation = quat;
     m_isDirty  = true;
 }

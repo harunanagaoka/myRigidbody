@@ -16,9 +16,9 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 	const vector<SimpleMath::Vector3> vertices_A = collider_A->GetWorldVertices();
 	const vector<SimpleMath::Vector3> vertices_B = collider_B->GetWorldVertices();
 
-	array<SimpleMath::Vector3, g_maxSimplexSize> simplex;//シンプレックス
-
-	SimpleMath::Vector3 ao, bo, ab, ac, a, b, c, abperp, acperp;
+	array<PointInfo, g_maxSimplexSize> simplex;//シンプレックス
+	PointInfo a;
+	SimpleMath::Vector3 ao, bo, ab, ac, b, c, abperp, acperp;
 
 	size_t index = 0;//現在のsimplexの頂点数
 
@@ -35,7 +35,7 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 	}
 
 	a = simplex[0] = Support(vertices_A, vertices_B, d);
-	CheckDuplicationAndSet(visitedPoints, a);
+	CheckDuplicationAndSet(visitedPoints, a.point);
 	index++;
 
 	//if (a.Dot(d) < 0)
@@ -44,7 +44,7 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 	//}//1点目はなんも考えず追加
 
 	//2点目
-	d = -a;
+	d = -a.point;
 
 	//if (d.LengthSquared() < 1e-6f)
 	//{
@@ -57,18 +57,19 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 
 		a = Support(vertices_A, vertices_B, d);
 
-		if (a.Dot(d) < 0)
+		if (a.point.Dot(d) < 0)
 		{
 			//交差していない　status = -1;
 			break;
 		}
 
-		CheckDuplicationAndSet(visitedPoints, a);//重複した場合のロジック追加
+		CheckDuplicationAndSet(visitedPoints, a.point);//重複した場合のロジック追加
 		simplex[index] = a;
 		index++;
 
 		//シンプレックスと原点の衝突判定
 		//方向を更新
+		
 		if (HandleSimplex(simplex, index, d) == true)//衝突
 		{
 			break;
@@ -93,11 +94,11 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 		float squaredDistance = numeric_limits<float>::max();
 
 		//もう一度サポート点を取得し距離を測る
-		SimpleMath::Vector3 checkPoint;
+		PointInfo checkPoint;
 		checkPoint = Support(vertices_A, vertices_B, d);
 
 		//delta = 今の探索方向に対して、新しいサポート点がどれくらい前進できたか。
-		float delta = checkPoint.Dot(d);
+		float delta = checkPoint.point.Dot(d);
 
 		// 内積が0より大きい　かつ　新サポート点が、もう原点に届かないレベルで遠い場合
 		if (delta > 0 && delta * delta > squaredDistance)//&& (delta * delta > squaredDistance * input.m_maximumDistanceSquared)
@@ -106,7 +107,7 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 			break;
 		}
 
-		if (!CheckDuplicationAndSet(visitedPoints, checkPoint)) {//重複チェック　checkduplicationを流用
+		if (!CheckDuplicationAndSet(visitedPoints, checkPoint.point)) {//重複チェック　checkduplicationを流用
 			checkSimplex = true;
 			break;
 		}
@@ -132,19 +133,19 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 		}
 
 		//上にあてはまらなかったら新しい有効なサポート点なのでシンプレックスに追加、最接近点を求める
-		CheckDuplicationAndSet(visitedPoints, checkPoint);
+		CheckDuplicationAndSet(visitedPoints, checkPoint.point);
 		simplex[index] = checkPoint;
 		index++;
 
 		//closest()で最接近点を求める
-		SimpleMath::Vector3 closestPoint;
-		if (ComputeClosestPoint(simplex, index, closestPoint) == false) {
+		PointInfo closestPointInfo;
+		if (ComputeClosestPoint(simplex, index, closestPointInfo) == false) {
 			//	m_degenerateSimplex = 3;
 			checkSimplex = true;
 			break;
 		}
 
-		if (closestPoint.LengthSquared() < 1e-6f) {
+		if (closestPointInfo.point.LengthSquared() < 1e-6f) {
 			//closestPointを分離軸として保存
 			// m_degenerateSimplex = 6;
 			checkSimplex = true;
@@ -153,7 +154,7 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 
 		//最短ベクトル探すやつ
 		float previousSquaredDistance = squaredDistance;
-		squaredDistance = closestPoint.LengthSquared();
+		squaredDistance = closestPointInfo.point.LengthSquared();
 
 		if (previousSquaredDistance - squaredDistance <= 1e-6f * previousSquaredDistance) {
 			checkSimplex = true;
@@ -161,7 +162,7 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 			break;
 		}
 
-		d = closestPoint;
+		d = closestPointInfo.point;
 
 		//無限ループ対策ここに入れる
 
@@ -176,15 +177,23 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 	}
 
 	//デストラクタ的な処理
-	if (checkSimplex)//checkSimplex
+	if (checkSimplex)
 	{
-		SimpleMath::Vector3 closest;
-		ComputeClosestPoint(simplex, index, closest);
+		PointInfo closestPointInfo;
+		ComputeClosestPoint(simplex, index, closestPointInfo);
 
-		float a = closest.LengthSquared();
+		float a = closestPointInfo.point.LengthSquared();
 
-		if (closest.LengthSquared() <= 0.1f)
+		if (closestPointInfo.point.LengthSquared() <= m_contactMargin)
 		{
+			SimpleMath::Vector3 normal = closestPointInfo.point;
+			normal.Normalize();
+
+			info.normal = normal;
+			info.penetrationDepth = closestPointInfo.point.Length();
+			info.contactPointA = closestPointInfo.supA;
+			info.contactPointB = closestPointInfo.supB;
+			info.hasValue = true;
 			return true;
 		}
 		
@@ -201,7 +210,8 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 	return false;
 }
 
-bool GJKSolver::HandleSimplex(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& direction) {
+bool GJKSolver::HandleSimplex(array<PointInfo, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& direction) {
+
 	switch (index) {
 	case 2:
 		return HandlePoint(simplex, index, direction);
@@ -219,7 +229,7 @@ bool GJKSolver::HandleSimplex(array<SimpleMath::Vector3, g_maxSimplexSize>& simp
 	return false;
 }
 
-bool GJKSolver::ComputeClosestPoint(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& closest)
+bool GJKSolver::ComputeClosestPoint(array<PointInfo, g_maxSimplexSize>& simplex, size_t& index, PointInfo& closestPointInfo)
 {
 	switch (index) {
 	case 0:
@@ -229,22 +239,22 @@ bool GJKSolver::ComputeClosestPoint(array<SimpleMath::Vector3, g_maxSimplexSize>
 		break;
 	case 1:
 
-		closest = simplex[0];
+		closestPointInfo = simplex[0];
 
 		break;
 	case 2:
 
-		closest = ClosestPointOnSegment(simplex);
+		ClosestPointOnSegment(simplex, closestPointInfo);
 
 		break;
 	case 3:
 
-		closest = ClosestPointOnTriangle(simplex);
+		ClosestPointOnTriangle(simplex, closestPointInfo);
 
 		break;
 	case 4:
 
-		closest = ClosestPointOnTetrahedron(simplex);
+		ClosestPointOnTetrahedron(simplex, closestPointInfo);
 
 		break;
 	default:
@@ -255,61 +265,73 @@ bool GJKSolver::ComputeClosestPoint(array<SimpleMath::Vector3, g_maxSimplexSize>
 	return true;
 }
 
-SimpleMath::Vector3 GJKSolver::ClosestPointOnSegment(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex) {
+SimpleMath::Vector3 GJKSolver::ClosestPointOnSegment(array<PointInfo, g_maxSimplexSize>& simplex, PointInfo& closestPointInfo) {
 	SimpleMath::Vector3 A, B, AB, AO;
-	A = simplex[1];
-	B = simplex[0];
+	A = simplex[1].point;
+	B = simplex[0].point;
 	AB = B - A;
 	AO = -A;
 
 	float abDotab = AB.Dot(AB);
 	if (abDotab == 0) {
+
+		closestPointInfo = simplex[1];
 		return A;		//A == B
 	}
 
 	float t = AB.Dot(AO) / abDotab;
 	t = std::clamp(t, 0.0f, 1.0f);//線分の中に制限する
 
-	return A + t * AB;
+	closestPointInfo.point = A + t * AB;
+	closestPointInfo.supA = simplex[1].supA * (1.0f - t) + simplex[0].supA * t;
+	closestPointInfo.supB = simplex[1].supB * (1.0f - t) + simplex[0].supB * t;
+
+	return closestPointInfo.point;
 }
 
-SimpleMath::Vector3 GJKSolver::ClosestPointOnSegment(SimpleMath::Vector3 pointA, SimpleMath::Vector3 pointB) {
+SimpleMath::Vector3 GJKSolver::ClosestPointOnSegment(PointInfo& pointA, PointInfo& pointB, PointInfo& closestPointInfo) {
 	SimpleMath::Vector3 A, B, AB, AO;
-	A = pointA;
-	B = pointB;
+	A = pointA.point;
+	B = pointB.point;
 	AB = B - A;
 	AO = -A;
 
 	float abDotab = AB.Dot(AB);
 	if (abDotab == 0) {
+		closestPointInfo = pointA;
 		return A;		//A == B
 	}
 
 	float t = AB.Dot(AO) / abDotab;
 	t = std::clamp(t, 0.0f, 1.0f);//線分の中に制限する
 
+	closestPointInfo.point = A + t * AB;
+	closestPointInfo.supA = pointA.supA * (1.0f - t) + pointB.supA * t;
+	closestPointInfo.supB = pointA.supB * (1.0f - t) + pointB.supB * t;
+
 	return A + t * AB;
 
 }
 
-SimpleMath::Vector3 GJKSolver::ClosestPointOnTriangle(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex) {
+SimpleMath::Vector3 GJKSolver::ClosestPointOnTriangle(array<PointInfo, g_maxSimplexSize>& simplex, PointInfo& closestPointInfo) {
 	//原点 (0, 0, 0) から三角形平面に投影して、その点が三角形内にあるかを判定する
 	//三角形外なら、線分AB,BC,CAのうち最も近い線分の中の一点を計算して返す
-	SimpleMath::Vector3 A, B, C, AB, AC,normal;
+	PointInfo A, B, C;
+	SimpleMath::Vector3 AB, AC, normal;
 	A = simplex[2];
 	B = simplex[1];
 	C = simplex[0];
 
-	AB = B - A;
-	AC = C - A;
+	AB = B.point - A.point;
+	AC = C.point - A.point;
 	normal = AB.Cross(AC);
 
 	float area = normal.Length();
 	if (area < 1e-6f)//三角形がつぶれている場合
 	{
-		SimpleMath::Vector3 pAB = ClosestPointOnSegment(A, B);
-		SimpleMath::Vector3 pBC = ClosestPointOnSegment(B, C);
-		SimpleMath::Vector3 pCA = ClosestPointOnSegment(C, A);
+		SimpleMath::Vector3 pAB = ClosestPointOnSegment(A, B,closestPointInfo);
+		SimpleMath::Vector3 pBC = ClosestPointOnSegment(B, C, closestPointInfo);
+		SimpleMath::Vector3 pCA = ClosestPointOnSegment(C, A, closestPointInfo);
 
 		float dAB = pAB.LengthSquared();
 		float dBC = pBC.LengthSquared();
@@ -322,12 +344,12 @@ SimpleMath::Vector3 GJKSolver::ClosestPointOnTriangle(array<SimpleMath::Vector3,
 
 	normal.Normalize();
 
-	float distance = A.Dot(normal);
+	float distance = A.point.Dot(normal);
 	SimpleMath::Vector3 projected = -distance * normal;
 
 	SimpleMath::Vector3 v0 = AB;
 	SimpleMath::Vector3 v1 = AC;
-	SimpleMath::Vector3 v2 = projected - A;
+	SimpleMath::Vector3 v2 = projected - A.point;
 
 	float d00 = v0.Dot(v0);
 	float d01 = v0.Dot(v1);
@@ -337,7 +359,11 @@ SimpleMath::Vector3 GJKSolver::ClosestPointOnTriangle(array<SimpleMath::Vector3,
 
 	float denom = d00 * d11 - d01 * d01;
 	if (denom == 0.0f)
-		return A;
+	{
+		closestPointInfo = simplex[2];
+		return closestPointInfo.point;
+	}
+		
 
 	float v = (d11 * d20 - d01 * d21) / denom;
 	float w = (d00 * d21 - d01 * d20) / denom;
@@ -346,57 +372,88 @@ SimpleMath::Vector3 GJKSolver::ClosestPointOnTriangle(array<SimpleMath::Vector3,
 	// 三角形内部かどうかチェック
 	if (u >= 0 && v >= 0 && w >= 0)
 	{
-		return u * A + v * B + w * C;
+		closestPointInfo.point = u * A.point + v * B.point + w * C.point;
+
+		closestPointInfo.supA =
+			simplex[2].supA * u +
+			simplex[1].supA * v +
+			simplex[0].supA * w;
+
+		closestPointInfo.supB =
+			simplex[2].supB * u +
+			simplex[1].supB * v +
+			simplex[0].supB * w;
+
+		return closestPointInfo.point;
+
 	}
 
 	// 外部なら辺上の最近点を探す
-	SimpleMath::Vector3 pAB = ClosestPointOnSegment(A, B);
-	SimpleMath::Vector3 pBC = ClosestPointOnSegment(B, C);
-	SimpleMath::Vector3 pCA = ClosestPointOnSegment(C, A);
+	PointInfo closestAB, closestBC, closestCA;
+	SimpleMath::Vector3 pAB = ClosestPointOnSegment(A, B, closestAB);
+	SimpleMath::Vector3 pBC = ClosestPointOnSegment(B, C, closestBC);
+	SimpleMath::Vector3 pCA = ClosestPointOnSegment(C, A, closestCA);
 
 	float dAB = pAB.LengthSquared();
 	float dBC = pBC.LengthSquared();
 	float dCA = pCA.LengthSquared();
 
-	if (dAB <= dBC && dAB <= dCA) return pAB;
-	if (dBC <= dCA) return pBC;
+	if (dAB <= dBC && dAB <= dCA) {//このタイミングでゼロになっとる
+		closestPointInfo = closestAB;
+		return pAB;
+	}
+	if (dBC <= dCA) {
+		closestPointInfo = closestBC;
+		return pBC;
+	}
+	closestPointInfo = closestCA;
 	return pCA;
 }
 
-SimpleMath::Vector3 GJKSolver::ClosestPointOnTriangle(SimpleMath::Vector3 pointA, SimpleMath::Vector3 pointB, SimpleMath::Vector3 pointC) {
-	SimpleMath::Vector3 A, B, C, AB, AC, normal;
+SimpleMath::Vector3 GJKSolver::ClosestPointOnTriangle(PointInfo& pointA, PointInfo& pointB, PointInfo& pointC, PointInfo& closestPointInfo) {
+	PointInfo A, B, C;
+	SimpleMath::Vector3 AB, AC, normal;
 	A = pointA;
 	B = pointB;
 	C = pointC;
 
-	AB = B - A;
-	AC = C - A;
+	AB = B.point - A.point;
+	AC = C.point - A.point;
 	normal = AB.Cross(AC);
 
 	float area = normal.Length();
 	if (area < 1e-6f)//三角形がつぶれている場合
 	{
-		SimpleMath::Vector3 pAB = ClosestPointOnSegment(A, B);
-		SimpleMath::Vector3 pBC = ClosestPointOnSegment(B, C);
-		SimpleMath::Vector3 pCA = ClosestPointOnSegment(C, A);
+		PointInfo ABtmp, BCtmp, CAtmp;
+
+		SimpleMath::Vector3 pAB = ClosestPointOnSegment(A, B, ABtmp);
+		SimpleMath::Vector3 pBC = ClosestPointOnSegment(B, C, BCtmp);
+		SimpleMath::Vector3 pCA = ClosestPointOnSegment(C, A, CAtmp);
 
 		float dAB = pAB.LengthSquared();
 		float dBC = pBC.LengthSquared();
 		float dCA = pCA.LengthSquared();
 
-		if (dAB <= dBC && dAB <= dCA) return pAB;
-		if (dBC <= dCA) return pBC;
+		if (dAB <= dBC && dAB <= dCA) { 
+			closestPointInfo = ABtmp;
+			return pAB; }
+
+		if (dBC <= dCA) { 
+			closestPointInfo = BCtmp;
+			return pBC; }
+
+		closestPointInfo = CAtmp;
 		return pCA;
 	}
 
 	normal.Normalize();
 
-	float distance = A.Dot(normal);
+	float distance = A.point.Dot(normal);
 	SimpleMath::Vector3 projected = -distance * normal;
 
 	SimpleMath::Vector3 v0 = AB;
 	SimpleMath::Vector3 v1 = AC;
-	SimpleMath::Vector3 v2 = projected - A;
+	SimpleMath::Vector3 v2 = projected - A.point;
 
 	float d00 = v0.Dot(v0);
 	float d01 = v0.Dot(v1);
@@ -406,8 +463,10 @@ SimpleMath::Vector3 GJKSolver::ClosestPointOnTriangle(SimpleMath::Vector3 pointA
 
 	float denom = d00 * d11 - d01 * d01;
 	if (denom == 0.0f)
-		return A;
-
+	{
+		closestPointInfo = A;
+		return A.point;
+	}
 	float v = (d11 * d20 - d01 * d21) / denom;
 	float w = (d00 * d21 - d01 * d20) / denom;
 	float u = 1.0f - v - w;
@@ -415,45 +474,70 @@ SimpleMath::Vector3 GJKSolver::ClosestPointOnTriangle(SimpleMath::Vector3 pointA
 	// 三角形内部かどうかチェック
 	if (u >= 0 && v >= 0 && w >= 0)
 	{
-		return u * A + v * B + w * C;
+		closestPointInfo.point = u * A.point + v * B.point + w * C.point;
+		closestPointInfo.supA = u * A.supA + v * B.supA + w * C.supA;
+		closestPointInfo.supB = u * A.supB + v * B.supB + w * C.supB;
+
+		return u * A.point + v * B.point + w * C.point;
 	}
 
-	// 外部なら辺上の最近点を探すケロ
-	SimpleMath::Vector3 pAB = ClosestPointOnSegment(A, B);
-	SimpleMath::Vector3 pBC = ClosestPointOnSegment(B, C);
-	SimpleMath::Vector3 pCA = ClosestPointOnSegment(C, A);
+	// 外部なら辺上の最近点を探す
+	PointInfo closestAB, closestBC, closestCA;
+	SimpleMath::Vector3 pAB = ClosestPointOnSegment(A, B, closestAB);
+	SimpleMath::Vector3 pBC = ClosestPointOnSegment(B, C, closestBC);
+	SimpleMath::Vector3 pCA = ClosestPointOnSegment(C, A, closestCA);
 
 	float dAB = pAB.LengthSquared();
 	float dBC = pBC.LengthSquared();
 	float dCA = pCA.LengthSquared();
 
-	if (dAB <= dBC && dAB <= dCA) return pAB;
-	if (dBC <= dCA) return pBC;
+	if (dAB <= dBC && dAB <= dCA) {
+		closestPointInfo = closestAB;
+		return pAB;
+	}
+	if (dBC <= dCA) {
+		closestPointInfo = closestBC;
+		return pBC;
+	}
+	closestPointInfo = closestCA;
 	return pCA;
 }
 
-SimpleMath::Vector3 GJKSolver::ClosestPointOnTetrahedron(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex) {
-	SimpleMath::Vector3 A, B, C, D;
+SimpleMath::Vector3 GJKSolver::ClosestPointOnTetrahedron(array<PointInfo, g_maxSimplexSize>& simplex, PointInfo& closestPointInfo) {
+	PointInfo A, B, C, D,tmpABC, tmpACD, tmpABD, tmpBCD;
 	A = simplex[3];
 	B = simplex[2];
 	C = simplex[1];
 	D = simplex[0];
 
 	// 四面体の4つの面を構成する三角形
-	SimpleMath::Vector3 pABC = ClosestPointOnTriangle(A, B, C);
-	SimpleMath::Vector3 pACD = ClosestPointOnTriangle(A, C, D);
-	SimpleMath::Vector3 pABD = ClosestPointOnTriangle(A, B, D);
-	SimpleMath::Vector3 pBCD = ClosestPointOnTriangle(B, C, D);
+	SimpleMath::Vector3 pABC = ClosestPointOnTriangle(A, B, C, tmpABC);
+	SimpleMath::Vector3 pACD = ClosestPointOnTriangle(A, C, D, tmpACD);
+	SimpleMath::Vector3 pABD = ClosestPointOnTriangle(A, B, D, tmpABD);
+	SimpleMath::Vector3 pBCD = ClosestPointOnTriangle(B, C, D, tmpBCD);
 
 	float dABC = pABC.LengthSquared();
 	float dACD = pACD.LengthSquared();
 	float dABD = pABD.LengthSquared();
 	float dBCD = pBCD.LengthSquared();
 
-	// 一番近いやつを返すケロ
-	if (dABC <= dACD && dABC <= dABD && dABC <= dBCD) return pABC;
-	if (dACD <= dABD && dACD <= dBCD) return pACD;
-	if (dABD <= dBCD) return pABD;
+	// 一番近いやつを返す
+	if (dABC <= dACD && dABC <= dABD && dABC <= dBCD) {
+		closestPointInfo = tmpABC;
+		return pABC;
+	}
+		
+	if (dACD <= dABD && dACD <= dBCD) {
+		closestPointInfo = tmpACD;
+		return pACD;
+	}
+
+	if (dABD <= dBCD) {
+		closestPointInfo = tmpABD;
+		return pABD;
+	}
+
+	closestPointInfo = tmpBCD;
 	return pBCD;
 }
 
@@ -520,10 +604,10 @@ bool GJKSolver::SimplexHitTest(array<SimpleMath::Vector3, g_maxSimplexSize>& sim
 	}
 }
 
-bool GJKSolver::HandlePoint(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& direction) {
+bool GJKSolver::HandlePoint(array<PointInfo, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& direction) {
 	SimpleMath::Vector3 A, B, AB, AO; 
-	A = simplex[1];
-	B = simplex[0];
+	A = simplex[1].point;
+	B = simplex[0].point;
 	AB = B - A;
 	AO = -A;
 
@@ -546,11 +630,11 @@ bool GJKSolver::HandlePoint(array<SimpleMath::Vector3, g_maxSimplexSize>& simple
 	return closestPoint.LengthSquared() < 1e-6f;
 }
 
-bool GJKSolver::HandleTriangle(std::array<SimpleMath::Vector3, 4>& simplex, size_t& index, SimpleMath::Vector3& direction) {
+bool GJKSolver::HandleTriangle(array<PointInfo, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& direction) {
 
-	const SimpleMath::Vector3& a = simplex[2];
-	const SimpleMath::Vector3& b = simplex[1];
-	const SimpleMath::Vector3& c = simplex[0];
+	const SimpleMath::Vector3& a = simplex[2].point;
+	const SimpleMath::Vector3& b = simplex[1].point;
+	const SimpleMath::Vector3& c = simplex[0].point;
 
 	SimpleMath::Vector3 ao = -a;//原点方向
 	SimpleMath::Vector3 ab = b - a;
@@ -608,12 +692,12 @@ bool GJKSolver::HandleTriangle(std::array<SimpleMath::Vector3, 4>& simplex, size
 }
 
 
-bool GJKSolver::HandleTetrahedron(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& d) {
+bool GJKSolver::HandleTetrahedron(array<PointInfo, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& d) {
 	// 四面体の頂点
-	const SimpleMath::Vector3& A = simplex[3];
-	const SimpleMath::Vector3& B = simplex[2];
-	const SimpleMath::Vector3& C = simplex[1];
-	const SimpleMath::Vector3& D = simplex[0];
+	const SimpleMath::Vector3& A = simplex[3].point;
+	const SimpleMath::Vector3& B = simplex[2].point;
+	const SimpleMath::Vector3& C = simplex[1].point;
+	const SimpleMath::Vector3& D = simplex[0].point;
 
 	// 原点に向かうベクトル
 	SimpleMath::Vector3 AO = -A;

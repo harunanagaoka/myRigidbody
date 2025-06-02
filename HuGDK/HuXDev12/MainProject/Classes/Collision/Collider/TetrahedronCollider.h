@@ -16,14 +16,19 @@ public:
 
         //形に応じた頂点を設定します。
         m_localVertices.assign(m_primitiveVertices.begin(), m_primitiveVertices.end());
+
+
+
+        ComputeInertiaTensor();
+
 	}
 
     SimpleMath::Vector3 ComputeCenter() const  override;
+
+    void ComputeInertiaTensor() override;
     
 
 private:
-
-
 
     const std::array<SimpleMath::Vector3, 4> m_primitiveVertices = {
         // 正四面体の頂点

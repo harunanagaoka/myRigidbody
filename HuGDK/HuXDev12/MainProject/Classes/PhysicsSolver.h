@@ -13,27 +13,14 @@ class PhysicsSolver{
 public:
 	void Update(Transform& transform);
 
-	void ComputeGravity(float dt);
-
-	void UseGravity(bool use) { m_isGravity = use; }
-
-	void SetStatic(bool isStatic) { m_isStatic = isStatic; }
-
+	SimpleMath::Vector3 ComputeGravity(const SimpleMath::Vector3& position, SimpleMath::Vector3& velocity, const float gravityScale);
 
 private:
 
-	SimpleMath::Vector3 m_velocity = SimpleMath::Vector3::Zero;
+	SimpleMath::Vector3 m_velocity = SimpleMath::Vector3::Zero;//平行速度
+	SimpleMath::Vector3 m_angularvelocity = SimpleMath::Vector3::Zero;//角速度
 
-	bool m_isStatic = false;
-
-	//重力
-	bool m_isGravity = true;
-	float m_gravityScale = 1.0;
-	float m_mass = 1.0;
 	const float m_gravityAccelConst = 9.8;
-
-	
-	
 };
 
 

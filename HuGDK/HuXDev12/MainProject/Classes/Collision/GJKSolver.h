@@ -20,27 +20,28 @@ public:
 
 	bool SimplexHitTest(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t& index);
 
-	bool ComputeClosestPoint(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& closest);
+	bool ComputeClosestPoint(array<PointInfo, g_maxSimplexSize>& simplex, size_t& index, PointInfo& closestPointInfo);
 
-	SimpleMath::Vector3 ClosestPointOnSegment(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex);
+	SimpleMath::Vector3 ClosestPointOnSegment(array<PointInfo, g_maxSimplexSize>& simplex, PointInfo& closestPointInfo);
 
-	SimpleMath::Vector3 ClosestPointOnSegment(SimpleMath::Vector3 pointA, SimpleMath::Vector3 pointB);
+	SimpleMath::Vector3 ClosestPointOnSegment(PointInfo& pointA, PointInfo& pointB, PointInfo& closestPointInfo);
 
-	SimpleMath::Vector3 ClosestPointOnTriangle(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex);
+	SimpleMath::Vector3 ClosestPointOnTriangle(array<PointInfo, g_maxSimplexSize>& simplex, PointInfo& closestPointInfo);
 
-	SimpleMath::Vector3 ClosestPointOnTriangle(SimpleMath::Vector3 pointA, SimpleMath::Vector3 pointB, SimpleMath::Vector3 pointC);
+	SimpleMath::Vector3 ClosestPointOnTriangle(PointInfo& pointA, PointInfo& pointB, PointInfo& pointC, PointInfo& closestPointInfo);
 
-	SimpleMath::Vector3 ClosestPointOnTetrahedron(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex);
+	SimpleMath::Vector3 ClosestPointOnTetrahedron(array<PointInfo, g_maxSimplexSize>& simplex, PointInfo& closestPointInfo);
 
-	bool HandleSimplex(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& direction);
+	bool HandleSimplex(array<PointInfo, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& direction);
 
-	bool HandlePoint(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& direction);
+	bool HandlePoint(array<PointInfo, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& direction);
 
-	bool HandleTriangle(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& direction);
+	bool HandleTriangle(array<PointInfo, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& direction);
 
-	bool HandleTetrahedron(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& d);
+	bool HandleTetrahedron(array<PointInfo, g_maxSimplexSize>& simplex, size_t& index, SimpleMath::Vector3& d);
 
 private:
 
 	EPASolver m_epaSolver;
+	float m_contactMargin = 0.15;
 };
