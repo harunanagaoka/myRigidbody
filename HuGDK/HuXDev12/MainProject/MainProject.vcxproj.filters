@@ -129,13 +129,7 @@
     <ClInclude Include="Classes\PhysicsSolver.h">
       <Filter>Classes</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\Collision\BoxCollider.h">
-      <Filter>Classes\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="Classes\Collision\CollisionDetection.h">
-      <Filter>Classes\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Classes\Collision\CollisionManager.h">
       <Filter>Classes\Physics</Filter>
     </ClInclude>
     <ClInclude Include="Classes\Collision\Collider\PhysicsCollider.h">
@@ -156,9 +150,6 @@
     <ClInclude Include="Classes\Resistry\PhysicsTypes.h">
       <Filter>Classes\Resistry</Filter>
     </ClInclude>
-    <ClInclude Include="Classes\Collision\CollisionSupport.h">
-      <Filter>Classes\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="Classes\Collision\EPASolver.h">
       <Filter>Classes\Physics</Filter>
     </ClInclude>
@@ -167,6 +158,12 @@
     </ClInclude>
     <ClInclude Include="Classes\Collision\Collider\PhysicsColliderFactory.h">
       <Filter>Classes\Physics\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\Collider\BoxCollider.h">
+      <Filter>Classes\Physics\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\CollisionSupport.h">
+      <Filter>Classes\Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -218,13 +215,7 @@
     <ClCompile Include="Classes\PhysicsSolver.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
-    <ClCompile Include="Classes\Collision\BoxCollider.cpp">
-      <Filter>Classes\Physics</Filter>
-    </ClCompile>
     <ClCompile Include="Classes\Collision\CollisionDetection.cpp">
-      <Filter>Classes\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Classes\Collision\CollisionManager.cpp">
       <Filter>Classes\Physics</Filter>
     </ClCompile>
     <ClCompile Include="Classes\Rigidbody.cpp">
@@ -244,6 +235,9 @@
     </ClCompile>
     <ClCompile Include="Classes\Collision\GJKSolver.cpp">
       <Filter>Classes\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Collision\Collider\BoxCollider.cpp">
+      <Filter>Classes\Physics\Collider</Filter>
     </ClCompile>
     <ClCompile Include="Classes\Collision\CollisionSupport.cpp">
       <Filter>Classes\Physics</Filter>

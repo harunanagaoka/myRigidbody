@@ -34,6 +34,8 @@ class PhysicsCollider {
 		 }
 	 };
 
+	 virtual void SetSize(SimpleMath::Vector3 size) { m_size = size; }
+
 	 const vector<SimpleMath::Vector3> GetWorldVertices() const { return m_worldVertices; }
 
 	 const SimpleMath::Matrix GetInverseInertiaTensorWorld() { return m_invInertiaTensorWorld; }
@@ -56,6 +58,9 @@ class PhysicsCollider {
 
 protected:
 	ColliderType m_type = ColliderType::Error;
+	
+	//Box‚ÌŽž‚ÉŽg—p
+	SimpleMath::Vector3 m_size = SimpleMath::Vector3::One;
 
 	float m_mass = 1.0f;
 

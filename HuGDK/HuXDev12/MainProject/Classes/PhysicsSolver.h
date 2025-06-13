@@ -7,7 +7,7 @@
 #include "..\Base\pch.h"
 #include "..\Base\dxtk.h"
 #include "Transform.h"
-#include "Collision\BoxCollider.h"
+//#include "Collision\BoxCollider.h"
 
 class PhysicsSolver{
 public:

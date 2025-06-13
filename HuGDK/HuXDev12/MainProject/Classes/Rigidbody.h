@@ -21,9 +21,10 @@ public:
 		m_transform.SetPosition(position);
 	}
 
-	void Update();
-	void ImpactResponse(const Rigidbody* hitObject,const ContactInfo& info,bool isA);
+	void Update(float deltaTime);
+	void ImpactResponse(const Rigidbody* hitObject,ContactInfo& info,bool isA);
 	void Correct(const Rigidbody* hitObject,SimpleMath::Vector3 normal, float penetrationDepth);
+	void ApplyFrictionImpulse(const Rigidbody* hitObject, const ContactInfo& info, bool isA);
 	void MoveBy(const SimpleMath::Vector3& offset) {
 		m_transform.SetPosition(m_transform.GetPosition() + offset);}
 
@@ -36,6 +37,7 @@ public:
 	PhysicsCollider* GetCollider() const { return m_collider; }
 	const SimpleMath::Vector3 GetVelocity() const { return m_velocity; }
 	const float GetMass() const { return m_mass; }
+	const float GetFriction() const { return m_friction; }
 
 private:
 	Transform m_transform;
@@ -44,7 +46,8 @@ private:
 
 	int m_id = -1;
 	float m_mass = 1.0f;
-	float m_restitution = 0.8;//îΩî≠åWêî
+	float m_restitution = 2;//îΩî≠åWêî
+	float m_friction = 0.2f;
 
 	bool m_isStatic = false;
 	bool m_isGravity = true;

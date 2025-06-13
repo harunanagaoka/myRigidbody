@@ -6,7 +6,7 @@
 
 #include "..\..\Base\pch.h"
 #include "..\..\Base\dxtk.h"
-#include "BoxCollider.h"
+//#include "BoxCollider.h"
 #include "..\Rigidbody.h"
 #include "CollisionDetection.h"
 

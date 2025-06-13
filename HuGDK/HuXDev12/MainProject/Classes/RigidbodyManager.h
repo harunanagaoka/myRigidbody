@@ -31,6 +31,10 @@ public:
 
 	void UpdateAll();
 
+	void PhysicsUpdate();
+
+
+
 private:
 	PhysicsColliderFactory m_colliderFactory;
 	CollisionDetection m_detector;

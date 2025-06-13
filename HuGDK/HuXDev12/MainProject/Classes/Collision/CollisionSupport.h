@@ -40,10 +40,21 @@ namespace CollisionSupport {
 	};
 
 	struct FaceInfo {
-		SimpleMath::Vector3 indexA, indexB, indexC;//頂点
-		size_t Anum, Bnum, Cnum;//polytopeの数に対応している
 		SimpleMath::Vector3 normal;//法線
 		float distanceToOrigin;
+		PointInfo pointA, pointB, pointC;//面の頂点
+		FaceInfo* neighbors[3] = {nullptr,nullptr,nullptr};//隣接する面
+		FaceInfo* prev = nullptr;
+		FaceInfo* next = nullptr;
+		unsigned char neighborEdges[3];//隣接面のどの辺に接しているか
+		unsigned char visitedPass;
+		unsigned char pass;
+	};
+
+	struct Horizon {
+		FaceInfo* firstFace = nullptr;
+		FaceInfo* currentFace = nullptr;
+		unsigned int numberOfFaces = 0;
 	};
 
 	struct ContactInfo {
@@ -62,10 +73,13 @@ namespace CollisionSupport {
 
 	bool CheckDuplicationAndSet(unordered_set<SimpleMath::Vector3, Vector3Hash, Vector3Equal>& container, SimpleMath::Vector3& value);
 
-
 	constexpr inline size_t g_maxSimplexSize = 4; /*三次元なので四面体*/
 
+	bool TryEncloseOrigin(const vector<SimpleMath::Vector3>& vertices_A, const vector<SimpleMath::Vector3>& vertices_B, array<PointInfo, g_maxSimplexSize>& simplex, size_t& index);
 
+	bool IsEncloseOrigin(SimpleMath::Vector3 pointA, SimpleMath::Vector3 pointB, SimpleMath::Vector3 pointC, SimpleMath::Vector3 pointD);
 
+	bool IsValidTetrahedron(SimpleMath::Vector3 pointA, SimpleMath::Vector3 pointB, SimpleMath::Vector3 pointC, SimpleMath::Vector3 pointD);
 
+	void GenerateFrictionBasis(SimpleMath::Vector3 normal, SimpleMath::Vector3& tangent1, SimpleMath::Vector3& tangent2);
 };

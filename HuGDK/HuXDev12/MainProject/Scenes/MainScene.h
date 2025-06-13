@@ -59,6 +59,8 @@ private:
 
 	SimulationObject m_objB;
 
+	SimulationObject m_objC;
+
 	float frameTimer = 0.0f;
 	int frameCount = 0;
 	float fps = 0.0f;
