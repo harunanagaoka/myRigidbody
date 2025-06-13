@@ -202,12 +202,11 @@
     <ClInclude Include="Base\wiGamepad\wiRawGamepad.h" />
     <ClInclude Include="Base\wiGamepad\wiVector.h" />
     <ClInclude Include="Base\wiGamepad\wiXInput.h" />
-    <ClInclude Include="Classes\Collision\BoxCollider.h" />
+    <ClInclude Include="Classes\Collision\Collider\BoxCollider.h" />
     <ClInclude Include="Classes\Collision\Collider\PhysicsCollider.h" />
     <ClInclude Include="Classes\Collision\Collider\PhysicsColliderFactory.h" />
     <ClInclude Include="Classes\Collision\Collider\TetrahedronCollider.h" />
     <ClInclude Include="Classes\Collision\CollisionDetection.h" />
-    <ClInclude Include="Classes\Collision\CollisionManager.h" />
     <ClInclude Include="Classes\Collision\CollisionSupport.h" />
     <ClInclude Include="Classes\Collision\EPASolver.h" />
     <ClInclude Include="Classes\Collision\GJKSolver.h" />
@@ -247,10 +246,9 @@
     <ClCompile Include="Base\wiGamepad\wiMath.cpp" />
     <ClCompile Include="Base\wiGamepad\wiRawGamepad.cpp" />
     <ClCompile Include="Base\wiGamepad\wiXInput.cpp" />
-    <ClCompile Include="Classes\Collision\BoxCollider.cpp" />
+    <ClCompile Include="Classes\Collision\Collider\BoxCollider.cpp" />
     <ClCompile Include="Classes\Collision\Collider\TetrahedronCollider.cpp" />
     <ClCompile Include="Classes\Collision\CollisionDetection.cpp" />
-    <ClCompile Include="Classes\Collision\CollisionManager.cpp" />
     <ClCompile Include="Classes\Collision\CollisionSupport.cpp" />
     <ClCompile Include="Classes\Collision\EPASolver.cpp" />
     <ClCompile Include="Classes\Collision\GJKSolver.cpp" />

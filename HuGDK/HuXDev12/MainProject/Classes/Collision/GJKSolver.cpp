@@ -7,11 +7,13 @@
 bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* collider_B, ContactInfo& info) {
 
 	unordered_set<SimpleMath::Vector3, Vector3Hash, Vector3Equal> visitedPoints;//重複チェック用のコンテナ
-	int maxDuplication = 1000;//ToDo:なくす予定
-	int duplicationCount = 0;
+
 	int gjkMaxIter = 1000;
 
 	bool checkSimplex = false;
+	bool isDegenerate = false;
+
+	bool isContact = false;
 
 	const vector<SimpleMath::Vector3> vertices_A = collider_A->GetWorldVertices();
 	const vector<SimpleMath::Vector3> vertices_B = collider_B->GetWorldVertices();
@@ -38,19 +40,8 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 	CheckDuplicationAndSet(visitedPoints, a.point);
 	index++;
 
-	//if (a.Dot(d) < 0)
-	//{
-	//	return false;
-	//}//1点目はなんも考えず追加
-
 	//2点目
 	d = -a.point;
-
-	//if (d.LengthSquared() < 1e-6f)
-	//{
-	//	//接触→EPA　1点目が取れてるなら必ずこれも有効なので消した
-	//	return true;
-	//}
 
 	for (int i = 0; i < gjkMaxIter; i++)
 	{
@@ -59,11 +50,15 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 
 		if (a.point.Dot(d) < 0)
 		{
-			//交差していない　status = -1;
+			//交差していない
 			break;
 		}
 
-		CheckDuplicationAndSet(visitedPoints, a.point);//重複した場合のロジック追加
+		if (!CheckDuplicationAndSet(visitedPoints, a.point))
+		{
+			isDegenerate = true;
+			break;
+		}
 		simplex[index] = a;
 		index++;
 
@@ -72,24 +67,25 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 		
 		if (HandleSimplex(simplex, index, d) == true)//衝突
 		{
-			break;
-		}
-		else
-		{//非衝突
+			isContact = true;
 			break;
 		}
 
 		//更新後の方向の長さチェック
 		if (d.LengthSquared() < 1e-6f)
 		{
-			//status = -1;
 			break;
 		}
 	}
 
 
 	//以下CheckConvergence()　4まで育てながらgjkが収束してるかチェック
-	while (true) {
+
+	int count = 0;
+
+	while (index < g_maxSimplexSize || !isDegenerate || count <= gjkMaxIter) {
+
+		count++;
 
 		float squaredDistance = numeric_limits<float>::max();
 
@@ -101,91 +97,74 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 		float delta = checkPoint.point.Dot(d);
 
 		// 内積が0より大きい　かつ　新サポート点が、もう原点に届かないレベルで遠い場合
-		if (delta > 0 && delta * delta > squaredDistance)//&& (delta * delta > squaredDistance * input.m_maximumDistanceSquared)
+		if (delta > 0 && delta * delta > squaredDistance)
 		{
-			checkSimplex = true;
 			break;
 		}
 
-		if (!CheckDuplicationAndSet(visitedPoints, checkPoint.point)) {//重複チェック　checkduplicationを流用
-			checkSimplex = true;
+		if (!CheckDuplicationAndSet(visitedPoints, checkPoint.point)) {
+			isDegenerate = true;
 			break;
 		}
 		
-		float approach = squaredDistance - delta;//「距離がどれくらい改善されたか」
-		float relativeEpsilon = squaredDistance * 1e-6f;//「収束とみなしてよい、最小限の変化幅」REL_ERROR2は超小さい点。
+		float approach = squaredDistance - delta;//距離がどれくらい改善されたか
+		float relativeEpsilon = squaredDistance * 1e-6f;//収束とみなしてよい、最小限の変化幅
 
-		if (approach <= relativeEpsilon)//近づけなかった時
+		if (approach <= relativeEpsilon)//近づけなかった かつ　シンプレックス完成してなかったとき
 		{
-			if (approach < 1e-6f)
-			{
-				//		//完全に停滞した（ゼロ進捗）＝極端な退化ケースの発生
-				//		m_degenerateSimplex = 2;
-			}
-			else
-			{
-				//		//「ゼロじゃないけど、進捗が超少ない」
-				//		m_degenerateSimplex = 11;
-			}
-
-			checkSimplex = true;
+			isDegenerate = true;
 			break;
 		}
 
 		//上にあてはまらなかったら新しい有効なサポート点なのでシンプレックスに追加、最接近点を求める
-		CheckDuplicationAndSet(visitedPoints, checkPoint.point);
 		simplex[index] = checkPoint;
 		index++;
 
 		//closest()で最接近点を求める
 		PointInfo closestPointInfo;
 		if (ComputeClosestPoint(simplex, index, closestPointInfo) == false) {
-			//	m_degenerateSimplex = 3;
-			checkSimplex = true;
 			break;
 		}
 
-		if (closestPointInfo.point.LengthSquared() < 1e-6f) {
-			//closestPointを分離軸として保存
-			// m_degenerateSimplex = 6;
-			checkSimplex = true;
+		if (closestPointInfo.point.LengthSquared() < 1e-6f) {//接触
+			isContact = true;
 			break;
 		}
 
-		//最短ベクトル探すやつ
+		//最短ベクトル探す
 		float previousSquaredDistance = squaredDistance;
 		squaredDistance = closestPointInfo.point.LengthSquared();
 
-		if (previousSquaredDistance - squaredDistance <= 1e-6f * previousSquaredDistance) {
-			checkSimplex = true;
-			//m_degenerateSimplex = 12;
+		if (previousSquaredDistance - squaredDistance <= 1e-6f * previousSquaredDistance) {//接触
+			isContact = true;
 			break;
 		}
 
 		d = closestPointInfo.point;
 
-		//無限ループ対策ここに入れる
-
-	//if ループが基準いじょうになったら　エラー　break;
-		bool maxIndex = (index == 4);
-
-		if (maxIndex)
-		{
-			//m_degenerateSimplex = 13;//シンプレックスがいっぱいで探索できずに終わった系の退化
-			break;//checkSimplexは行わない。
-		}
 	}
 
-	//デストラクタ的な処理
-	if (checkSimplex)
-	{
 		PointInfo closestPointInfo;
 		ComputeClosestPoint(simplex, index, closestPointInfo);
 
-		float a = closestPointInfo.point.LengthSquared();
+		float kakaka = closestPointInfo.point.LengthSquared();
+		float sususus = closestPointInfo.point.Length();
 
-		if (closestPointInfo.point.LengthSquared() <= m_contactMargin)
+		if (closestPointInfo.point.LengthSquared() <= 3)
 		{
+
+			if (index < 4) {
+
+				bool Contact = TryEncloseOrigin(vertices_A, vertices_B, simplex, index);
+				if (!Contact && !isContact) {
+					return false;
+				}
+
+				ComputeClosestPoint(simplex, index, closestPointInfo);
+			}
+
+
+
 			SimpleMath::Vector3 normal = closestPointInfo.point;
 			normal.Normalize();
 
@@ -193,20 +172,19 @@ bool GJKSolver::GJK(const PhysicsCollider* collider_A, const PhysicsCollider* co
 			info.penetrationDepth = closestPointInfo.point.Length();
 			info.contactPointA = closestPointInfo.supA;
 			info.contactPointB = closestPointInfo.supB;
-			info.hasValue = true;
-			return true;
+			GenerateFrictionBasis(info.normal, info.tangent1, info.tangent2);
+			info.hasValue = true; 
+
+			bool abc = m_epaSolver.EPA(collider_A, collider_B, simplex, index, info);
+
+
+			if (info.penetrationDepth < 0.12) {
+				return true;
+			}
+			
 		}
 		
-		/*今のシンプレックス（1～4点）上で、
-		　原点に最も近い点を探して
-		　そのときの A, B それぞれの最近点を出す*/
-
-		//この時点で衝突深度を近似できる
-		//回転トルクも求められる
-
-	}
-
-	//以下EPAつかうなら使う。
+	info.hasValue = false;
 	return false;
 }
 
@@ -229,6 +207,13 @@ bool GJKSolver::HandleSimplex(array<PointInfo, g_maxSimplexSize>& simplex, size_
 	return false;
 }
 
+/// <summary>
+/// 
+/// </summary>
+/// <param name="simplex"></param>
+/// <param name="index"></param>
+/// <param name="closestPointInfo"></param>
+/// <returns>false indexの値に異常がある場合</returns>
 bool GJKSolver::ComputeClosestPoint(array<PointInfo, g_maxSimplexSize>& simplex, size_t& index, PointInfo& closestPointInfo)
 {
 	switch (index) {

@@ -1,264 +1,450 @@
-//
-//#include "EPASolver.h"
-//
-//ContactInfo EPASolver::EPA(const PhysicsCollider* collider_A, const PhysicsCollider* collider_B, array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, ContactInfo& info)
-//{
-//	const vector<SimpleMath::Vector3> vertices_1 = collider_A->GetWorldVertices();
-//	const vector<SimpleMath::Vector3> vertices_2 = collider_B->GetWorldVertices();
-//
-//	//GJKから受け取ったシンプレックスをvectorに移す（ポリトープ）
-//	vector<SimpleMath::Vector3> polytope(simplex.begin(), simplex.end());
-//	vector<size_t> faces = { 0, 1, 2,
-//							0, 3, 1,
-//							0, 2, 3,
-//							1, 3, 2 };//四面体
-//	vector<FaceInfo> facesInfo;
-//
-//	//すべての三角面の法線（+距離）を計算し、原点に最も近い面を探して返す
-//	size_t minFace = GetFaceNormals(polytope, faces, facesInfo);//原点に一番近いと思われる面の法線と距離
-//	//★戻り値をminFaceのみにする
-//
-//	SimpleMath::Vector3 minNormal;
-//	float minDistance = FLT_MAX;
-//	SimpleMath::Vector3 support;
-//
-//	minNormal = SimpleMath::Vector3(facesInfo[minFace].normal);//法線ベクトル
-//	minDistance = facesInfo[minFace].distanceToOrigin;//距離
-//
-//	int count = 0;
-//	while (count++ < 50) {//メインループ
-//
-//		support = Support(vertices_1, vertices_2, facesInfo[minFace].normal);
-//
-//		//★avoidfaceポリトープ破壊
-//		std::vector<size_t> facesToRemove;
-//		std::vector<std::pair<size_t, size_t>> uniqueEdges;
-//
-//		for (size_t i = 0; i < facesInfo.size(); i++) {
-//			if (facesInfo[i].normal.Dot(support) > 0) {
-//				size_t f = i * 3;
-//
-//				AddIfUniqueEdge(uniqueEdges, faces, f, f + 1);
-//				AddIfUniqueEdge(uniqueEdges, faces, f + 1, f + 2);
-//				AddIfUniqueEdge(uniqueEdges, faces, f + 2, f);
-//
-//				facesToRemove.push_back(i);//消す予定の番号
-//			}
-//		}
-//		std::sort(facesToRemove.rbegin(), facesToRemove.rend());//重複除去　後ろから消す
-//		for (size_t index : facesToRemove) {
-//			// FaceInfo削除
-//			facesInfo.erase(facesInfo.begin() + index);
-//
-//			// 対応するfacesインデックス3つを削除（index*3 から3連）
-//			size_t base = index * 3;
-//			faces.erase(faces.begin() + base, faces.begin() + base + 3);
-//		}
-//		//★avoidface
-//
-//		polytope.push_back(support);//サポート点追加
-//
-//		//★addnewface
-//		std::vector<FaceInfo> newFacesInfo;
-//		for (auto [edgeIndex1, edgeIndex2] : uniqueEdges) {
-//			FaceInfo newFaceInfo;
-//			size_t supportIndex = polytope.size() - 1;
-//
-//			newFaceInfo.indexA = polytope[edgeIndex1];
-//			newFaceInfo.indexB = polytope[edgeIndex2];
-//			newFaceInfo.indexC = polytope[supportIndex];
-//			newFaceInfo.Anum = edgeIndex1;
-//			newFaceInfo.Bnum = edgeIndex2;
-//			newFaceInfo.Cnum = supportIndex;
-//			newFacesInfo.push_back(newFaceInfo);
-//			faces.push_back(edgeIndex1);
-//			faces.push_back(edgeIndex2);
-//			faces.push_back(supportIndex);
-//		}
-//
-//		float oldMinDistance = facesInfo[minFace].distanceToOrigin;
-//		minFace = GetFaceNormals(polytope, faces, newFacesInfo);
-//		//原点→シンプレックス最接近点ｄを求める
-//		//サポート関数でｄ方向で最も遠い点vを探す
-//		//★addnewface
-//
-//		for (size_t i = 0; i < newFacesInfo.size(); i++) {
-//			if (newFacesInfo[i].distanceToOrigin < oldMinDistance) {
-//				minDistance = newFacesInfo[i].distanceToOrigin;
-//				minFace = facesInfo.size() + i;
-//			}
-//		}
-//		facesInfo.insert(facesInfo.end(), newFacesInfo.begin(), newFacesInfo.end());
-//		//★addnewface
-//		//★checkdistance
-//		float sDistance = facesInfo[minFace].normal.Dot(support);
-//
-//		if (abs(sDistance - minDistance) <= 1e-6f) {//終了チェック
-//			//minDistance = FLT_MAX;
-//			break;
-//		}
-//		//★checkdistance
-//
-//		minDistance = FLT_MAX;//ループ継続
-//	}
-//
-//	//デストラクタ
-//	SimpleMath::Vector3 tangent1, tangent2, contactPointA, contactPointB;
-//	//minNormal→跳ね返る方向
-//	//tangent1→摩擦その①（たとえば横方向スリップ）横方向の滑りを止める
-//	//tangent2→摩擦その②（たとえば前後スリップ）前後方向の滑りを止める
-//
-//	//★タンジェントの計算
-//	ComputeTangentBasis(minNormal, tangent1, tangent2);
-//
-//
-//	//接触点の計算
-//	//★FaceInfo[minFace]を渡す
-//	ComputeBarycentric(facesInfo[minFace], contactPointA, contactPointB);
-//
-//	info.contactPointA = contactPointA;
-//	info.contactPointB = contactPointB;
-//	info.tangent1 = tangent1;
-//	info.tangent2 = tangent2;
-//	info.normal = minNormal;
-//	info.penetrationDepth = facesInfo[minFace].distanceToOrigin;
-//	//info.penetrationDepth = max(0.0f, facesInfo[minFace].distanceToOrigin - bias);
-//	//めりこむ場合は上記を入れてみる
-//
-//	//今はfalseを返してるけど衝突情報の構造体を返す予定
-//	return info;
-//}
-//
-//void EPASolver::ComputeBarycentric(FaceInfo minFace, SimpleMath::Vector3& contactPointA, SimpleMath::Vector3& contactPointB)
-//{
-//	//求め方
-//	// 三角形 A, B, C と、内部の点 P に対して：
-//
-//	PointInfo& pA = m_polytope[minFace.Anum];
-//	PointInfo& pB = m_polytope[minFace.Bnum];
-//	PointInfo& pC = m_polytope[minFace.Cnum];
-//
-//	SimpleMath::Vector3 A, B, C, P;
-//	A = minFace.indexA;
-//	B = minFace.indexB;
-//	C = minFace.indexC;
-//	P = SimpleMath::Vector3::Zero;//原点
-//
-//	SimpleMath::Vector3 v0 = B - A;
-//	SimpleMath::Vector3 v1 = C - A;
-//	SimpleMath::Vector3 v2 = P - A;
-//
-//	float d00 = v0.Dot(v0);
-//	float d01 = v0.Dot(v1);
-//	float d11 = v1.Dot(v1);
-//	float d20 = v2.Dot(v0);
-//	float d21 = v2.Dot(v1);
-//
-//	float denom = d00 * d11 - d01 * d01;
-//	float v = (d11 * d20 - d01 * d21) / denom;
-//	float w = (d00 * d21 - d01 * d20) / denom;
-//	float u = 1.0f - v - w;
-//	//★座標も入った三角形の構造体受け取り計算
-//	contactPointA = u * pA.supA + v * pB.supA + w * pC.supA;
-//	contactPointB = u * pA.supB + v * pB.supB + w * pC.supB;
-//}
-//
-//void EPASolver::ComputeTangentBasis(const SimpleMath::Vector3& normal, SimpleMath::Vector3& tangent1, SimpleMath::Vector3& tangent2)
-//{
-//	if (normal.x >= 0.57735f)//√(1 / 3) の近似値
-//	{
-//		tangent1 = SimpleMath::Vector3(normal.y, -normal.x, 0.0f);
-//	}
-//	else
-//	{
-//		tangent1 = SimpleMath::Vector3(0.0f, normal.z, -normal.y);
-//	}
-//
-//	tangent1.Normalize();
-//	tangent2 = normal.Cross(tangent1);
-//}
-//
-//void EPASolver::AddIfUniqueEdge(
-//	std::vector<std::pair<size_t, size_t>>& edges,
-//	const std::vector<size_t>& faces,
-//	size_t a,
-//	size_t b)
-//{
-//	auto reverse = std::find(                       //      0--<--3
-//		edges.begin(),                              //     / \ B /   A: 2-0
-//		edges.end(),                                //    / A \ /    B: 0-2
-//		std::make_pair(faces[b], faces[a]) //   1-->--2
-//	);
-//
-//	if (reverse != edges.end()) {
-//		edges.erase(reverse);
-//	}
-//
-//	else {
-//		edges.emplace_back(faces[a], faces[b]);
-//	}
-//}
-//
-////bool SameDirection(SimpleMath::Vector4 normal, SimpleMath::Vector3 support) {
-////	SimpleMath::Vector3 vec3normal = SimpleMath::Vector3(normal.x, normal.y, normal.z);
-//
-////	return vec3normal.Dot(support) > 0;
-////}
-//
-//size_t EPASolver::GetFaceNormals(const std::vector<SimpleMath::Vector3>& polytope,
-//	const std::vector<size_t>& faces, vector<FaceInfo>& facesInfo)
-//{
-//	std::vector<SimpleMath::Vector4> normals;
-//	size_t minTriangle = 0;
-//	float  minDistance = FLT_MAX;
-//
-//	for (size_t i = 0; i < faces.size(); i += 3) {
-//
-//		FaceInfo faceInfo;
-//
-//
-//		SimpleMath::Vector3 a = faceInfo.indexA = polytope[faces[i]];
-//		faceInfo.Anum = faces[i];
-//
-//		SimpleMath::Vector3 b = faceInfo.indexB = polytope[faces[i + 1]];
-//		faceInfo.Bnum = faces[i + 1];
-//
-//		SimpleMath::Vector3 c = faceInfo.indexC = polytope[faces[i + 2]];
-//		faceInfo.Cnum = faces[i + 2];
-//		//ここのabcのインデックスを保持する（vectorで保存するか迷っとる）
-//
-//		SimpleMath::Vector3 ab = b - a;
-//		SimpleMath::Vector3 ac = c - a;
-//		SimpleMath::Vector3 normal = ab.Cross(ac);
-//
-//		// 長さゼロ＝面積ゼロの三角形
-//		if (normal.LengthSquared() < 1e-6f) {
-//			continue; // ← このfaceは無効としてスキップ
-//		}
-//
-//		normal.Normalize();
-//
-//		faceInfo.normal = normal;
-//
-//		float distance = normal.Dot(a);//原点（0,0,0）から法線方向に見た距離
-//
-//		if (distance < 0) {
-//			normal *= -1;
-//			distance *= -1;
-//		}
-//		faceInfo.distanceToOrigin = distance;
-//
-//		normals.emplace_back(SimpleMath::Vector4(normal.x, normal.y, normal.z, distance));
-//
-//		if (distance < minDistance) {
-//			minTriangle = i / 3;
-//			minDistance = distance;
-//		}
-//
-//		faceInfo.normal = normal;
-//		facesInfo.push_back(faceInfo);
-//	}
-//
-//	return minTriangle;
-//}
-//
+
+#include "EPASolver.h"
+
+/*edge 0 = A→B
+
+edge 1 = B→C
+
+edge 2 = C→A*/
+
+/// <summary>
+/// gjkから頂点情報を受け取りコライダー同士の衝突深度を計算し、ContactInfoに保存します。
+/// </summary>
+bool EPASolver::EPA(const PhysicsCollider* collider_A, const PhysicsCollider* collider_B, array<PointInfo, g_maxSimplexSize>& simplex, size_t& index, ContactInfo& info) {
+
+    m_vertices_1 = collider_A->GetWorldVertices();
+	m_vertices_2 = collider_B->GetWorldVertices();
+
+	if (index > 0 && EncloseOrigin(simplex,index)) {
+
+		m_polytope.clear();
+		m_polytope.insert(m_polytope.end(), simplex.begin(), simplex.end());
+
+		//頂点の順番を右手系に整える
+		const SimpleMath::Vector3& DA = m_polytope[3].point - m_polytope[0].point;
+		const SimpleMath::Vector3& DB = m_polytope[1].point - m_polytope[3].point;
+		const SimpleMath::Vector3& DC = m_polytope[2].point - m_polytope[3].point;
+
+		if (DA.Dot(DB.Cross(DC)) < 0) {
+
+			swap(m_polytope[0], m_polytope[1]);
+		}
+
+
+		InitPolytope();//MakePolytopeと分ける
+
+		FaceInfo* best = FindBest();
+		FaceInfo currentFace = *best;
+		PointInfo nextPoint;
+		unsigned int pass = 0;
+		unsigned int iterations = 0;
+		BindFaces(m_FacesInfo[0], 0, m_FacesInfo[1], 0);
+		BindFaces(m_FacesInfo[0], 1, m_FacesInfo[2], 0);
+		BindFaces(m_FacesInfo[0], 2, m_FacesInfo[3], 0);
+		BindFaces(m_FacesInfo[1], 1, m_FacesInfo[3], 2);
+		BindFaces(m_FacesInfo[1], 2, m_FacesInfo[2], 1);
+		BindFaces(m_FacesInfo[2], 2, m_FacesInfo[3], 1);
+
+		//EPAメインループ
+		for (int i = 0; i < m_EPAMaxIterations; i++) {
+
+			Horizon horizon;
+			bool success = true;
+			best->pass = ++pass;
+			nextPoint = Support(m_vertices_1, m_vertices_2, best->normal);
+			float distance = best->normal.Dot(nextPoint.point) - best->distanceToOrigin;
+			if (distance > 0.1) {
+
+				//ポリトープ拡張
+				for (int j = 0; (j < 3) && success; j++) {
+					success = ExpandPolytope(pass,nextPoint,best->neighbors[j],best->neighborEdges[j],horizon);
+					//if (!success) {
+					//	break;
+					//}
+				}
+
+				if (success && horizon.numberOfFaces >= 3) {
+					BindFaces(horizon.currentFace,1, horizon.firstFace, 2);
+					RemoveFace(best);
+					best = FindBest();
+					currentFace = *best;
+				}
+				else {
+					//m_status = eStatus::Failed;
+					//m_status = eStatus::InvalidHull;?だった
+					break;
+				}
+			}
+			else {
+				//m_status = eStatus::AccuraryReached;
+				break;
+			}
+		}
+
+		info.hasValue = true;
+		info.normal = currentFace.normal;
+		info.penetrationDepth = currentFace.distanceToOrigin;
+		PointInfo contactPoint = GetContactPoint(currentFace);
+		info.contactPointA = contactPoint.supA;
+		info.contactPointB = contactPoint.supB;
+		GenerateFrictionBasis(info.normal, info.tangent1, info.tangent2);
+
+		for (FaceInfo* f : m_FacesInfo) {
+			delete f;
+		}
+		m_FacesInfo.clear();
+
+		return true;
+	}
+
+	return false;
+}
+
+/// <summary>
+/// シンプレックスが4点に満たない場合、4点に増やしてシンプレックスが退化していないかを判定します。
+/// </summary>
+/// <param name="simplex">gjkで得られたシンプレックス</param>
+/// <param name="index">シンプレックスの点の数</param>
+bool EPASolver::EncloseOrigin(array<PointInfo, g_maxSimplexSize>& simplex, size_t& index) {
+
+	SimpleMath::Vector3 UnitX = SimpleMath::Vector3::Right;
+	SimpleMath::Vector3 UnitY = SimpleMath::Vector3::Up;
+	SimpleMath::Vector3 UnitZ = SimpleMath::Vector3::Forward;
+
+	array <SimpleMath::Vector3, 3> axis;
+
+	SimpleMath::Vector3 A;
+	SimpleMath::Vector3 B;
+	SimpleMath::Vector3 C;
+	SimpleMath::Vector3 D;
+	
+	switch (index) {
+		case 1: {
+
+			axis = { UnitX,UnitY,UnitZ };
+
+			for (int i = 0; i < 3; i++) {
+
+				simplex[index] = Support(m_vertices_1, m_vertices_2, axis[i]);
+				index++;
+			}
+
+			if (EncloseOrigin(simplex, index)) {
+				return true;
+			}
+			else {
+				array <SimpleMath::Vector3, 3> axis = { -UnitX,-UnitY,-UnitZ };
+				index = 1;
+				for (int i = 0; i < 3; i++) {
+
+					simplex[index] = Support(m_vertices_1, m_vertices_2, axis[i]);
+					index++;
+				}
+
+				if (EncloseOrigin(simplex, index)) {
+					return true;
+				}
+				else {
+					index = 1;
+					for (int i = 0; i < 3; i++) {
+
+						simplex[index] = {};
+						index++;
+					}
+
+					index = 1;
+					return false;
+				}
+
+			}
+
+			break;
+		}
+		case 2: {
+			axis = { UnitX,UnitY,UnitZ };
+			//線分を作る
+			SimpleMath::Vector3 d = simplex[1].point - simplex[0].point;
+
+			for (int i = 0; i < 3; i++) {
+				SimpleMath::Vector3 p = d.Cross(axis[i]);
+
+				if (p.LengthSquared() > 0)
+				{
+					simplex[2] = Support(m_vertices_1, m_vertices_2, p);
+					index = 3;
+					if (EncloseOrigin(simplex, index)) {
+						return true;
+					}
+					else {
+						p = -p;
+						simplex[2] = Support(m_vertices_1, m_vertices_2, p);
+						index = 3;
+						if (EncloseOrigin(simplex, index)) {
+							return true;
+						}
+					}
+				}
+			}
+
+			return false;
+
+			break;
+		}
+		case 3: {
+			A = simplex[2].point;
+			B = simplex[1].point;
+			C = simplex[0].point;
+
+			SimpleMath::Vector3 normal = (B - A).Cross(C - A);//右手系ベクトル
+
+			if (normal.LengthSquared() > 0) {
+
+				simplex[3] = Support(m_vertices_1, m_vertices_2, normal);
+				index = 4;
+				if (EncloseOrigin(simplex, index)) {
+					return true;
+				}
+				else {
+					normal = -normal;
+					simplex[3] = Support(m_vertices_1, m_vertices_2, normal);
+					index = 4;
+					if (EncloseOrigin(simplex, index)) {
+						return true;
+					}
+				}
+			}
+
+			return false;
+			break;
+		}
+		case 4: {
+			A = simplex[3].point;
+			B = simplex[2].point;
+			C = simplex[1].point;
+			D = simplex[0].point;
+
+			const SimpleMath::Vector3 AB = B - A;
+			const SimpleMath::Vector3 AC = C - A;
+			const SimpleMath::Vector3 AD = D - A;
+
+			//四面体の体積
+			float volume = abs(AB.Dot(AC.Cross(AD))) / 6.0f;
+
+			if (volume > 0)
+			{
+				const SimpleMath::Vector3 P = SimpleMath::Vector3::Zero;
+
+				return true;
+			}
+
+			return false;
+			break;
+		}
+	}
+	return false;
+}
+
+bool EPASolver::ExpandPolytope(unsigned char pass, PointInfo nextPoint, FaceInfo* face, unsigned int Index, Horizon& horizon) {
+	static const unsigned int i1m3[] = { 1, 2, 0 };
+	static const unsigned int i2m3[] = { 2, 0, 1 };//三角形用インデックス
+	
+	if (face->pass != pass) {
+
+		const unsigned int Index1 = i1m3[Index];
+
+		if (face->normal.Dot(nextPoint.point) - face->distanceToOrigin < 0) {
+			FaceInfo* newFace = AddFace(face->pointB, face->pointA, nextPoint);
+			//FaceInfo* newFace = AddFace(face->pointA, nextPoint, face->pointB);?
+
+			BindFaces(newFace, 0, face, Index);
+
+			if (horizon.currentFace != nullptr) {
+				BindFaces(horizon.currentFace, 1, newFace, 2);
+			}
+			else {
+				horizon.firstFace = newFace;
+			}
+
+			horizon.currentFace = newFace;
+			++horizon.numberOfFaces;
+
+			//face->pass = pass;
+			return true;
+		}
+		else {
+			
+			const unsigned int Index2 = i2m3[Index];
+			face->pass = pass;
+			if (ExpandPolytope(pass, nextPoint, face->neighbors[Index1], face->neighborEdges[Index1], horizon) &&
+				ExpandPolytope(pass, nextPoint, face->neighbors[Index2], face->neighborEdges[Index2], horizon)) {
+				
+				
+				return true;
+			}
+		}
+		//m_bestFaceに隣接する3つの面に対して新しい点から見える面を消す
+		//その境界を新しい点とつなげ再構築
+	}
+	return false;
+}
+
+
+/// <summary>
+/// 初期ポリトープから面情報を作ります。
+/// </summary>
+void EPASolver::InitPolytope() {
+
+	vector<size_t> faces = {
+	0, 1, 2,   // 面0
+	1, 0, 3,   // 面1
+	2, 1, 3,   // 面2
+	0, 2, 3    // 面3
+	};
+
+	//vector<size_t> faces = {
+	//0, 1, 2,
+	//0, 1, 3,
+	//1, 2, 3,
+	//2, 0, 3
+	//};
+
+
+	for (int i = 0; i < faces.size(); i += 3) {
+		FaceInfo* newface = new FaceInfo();
+
+		newface->pointA = m_polytope[faces[i]];
+		newface->pointB = m_polytope[faces[i + 1]];
+		newface->pointC = m_polytope[faces[i + 2]];
+		
+		SimpleMath::Vector3 ab = newface->pointB.point - newface->pointA.point;
+		SimpleMath::Vector3 ac = newface->pointC.point - newface->pointA.point;
+		newface->normal = ab.Cross(ac);
+
+		if (newface->normal.Dot(newface->pointA.point) < 0) {
+			newface->normal = -newface->normal;
+		}
+
+		newface->normal.Normalize();
+		newface->distanceToOrigin = newface->normal.Dot(newface->pointA.point);
+
+		m_FacesInfo.push_back(newface);
+	}
+}
+
+/// <summary>
+/// faceAとfaceBがedgeAとedgeBでつながっていることを記録します。
+/// </summary>
+void EPASolver::BindFaces(FaceInfo* faceA, unsigned char edgeA, FaceInfo* faceB, unsigned char edgeB) {
+	faceA->neighbors[edgeA] = faceB;
+	faceA->neighborEdges[edgeA] = edgeB;
+
+	faceB->neighbors[edgeB] = faceA;
+	faceB->neighborEdges[edgeB] = edgeA;
+}
+
+FaceInfo* EPASolver::AddFace(PointInfo& pointA, PointInfo& pointB, PointInfo& pointC) {
+
+	FaceInfo* newFace = new FaceInfo();
+	InitNewFace(newFace, pointA, pointB, pointC);
+	
+	newFace->prev = m_Last;
+	newFace->next = nullptr;
+
+	if (m_Last) {
+
+		m_Last->next = newFace;
+	}
+	else {
+
+		m_Root = newFace;
+	}
+
+	m_Last = newFace;
+
+	return newFace;
+}
+
+//新しい面が三角形になってるかチェックする処理追加
+void EPASolver::InitNewFace(FaceInfo* newFace, PointInfo& pointA, PointInfo& pointB, PointInfo& pointC) {
+	newFace->pointA = pointA;
+	newFace->pointB = pointB;
+	newFace->pointC = pointC;
+
+	SimpleMath::Vector3 ab = newFace->pointB.point - newFace->pointA.point;
+	SimpleMath::Vector3 ac = newFace->pointC.point - newFace->pointA.point;
+	newFace->normal = ab.Cross(ac);
+	newFace->normal.Normalize();
+
+	if (newFace->normal.Dot(newFace->pointA.point) < 0) {
+		newFace->normal = -newFace->normal;
+	}
+
+	newFace->distanceToOrigin = newFace->normal.Dot(newFace->pointA.point);
+
+
+	m_FacesInfo.push_back(newFace);
+
+}
+
+void EPASolver::RemoveFace(FaceInfo* target) {
+	auto it = std::remove(m_FacesInfo.begin(), m_FacesInfo.end(), target);
+	if (it != m_FacesInfo.end()){
+		m_FacesInfo.erase(it, m_FacesInfo.end());
+	}
+		
+}
+
+/// <summary>
+/// 最も原点に近い面を算出します。
+/// </summary>
+/// <returns>最も原点に近い面のポインタ</returns>
+FaceInfo* EPASolver::FindBest() {
+
+	FaceInfo* bestf = nullptr;
+	float bestd = FLT_MAX;
+	for (auto& face : m_FacesInfo) {
+		
+		if (face->distanceToOrigin < bestd && face->normal.Dot(face->pointA.point) > 0) {
+			bestd = face->distanceToOrigin;
+			bestf = face;
+		}
+
+	}
+	return bestf;
+}
+
+PointInfo EPASolver::GetContactPoint(FaceInfo face) {
+
+	PointInfo contactPoint;
+
+	const SimpleMath::Vector3& A = face.pointA.point;
+	const SimpleMath::Vector3& B = face.pointB.point;
+	const SimpleMath::Vector3& C = face.pointC.point;
+
+	// 原点を三角形ABCに射影したバリセンター係数を求めるケロ
+	SimpleMath::Vector3 AB = B - A;
+	SimpleMath::Vector3 AC = C - A;
+	SimpleMath::Vector3 AP = -A; // 原点 - A
+
+	float d00 = AB.Dot(AB);
+	float d01 = AB.Dot(AC);
+	float d11 = AC.Dot(AC);
+	float d20 = AP.Dot(AB);
+	float d21 = AP.Dot(AC);
+	float denom = d00 * d11 - d01 * d01;
+
+	float v = (d11 * d20 - d01 * d21) / denom;
+	float w = (d00 * d21 - d01 * d20) / denom;
+	float u = 1.0f - v - w;
+
+	// それぞれの形状の補間点を求める
+	contactPoint.supA = u * face.pointA.supA + v * face.pointB.supA + w * face.pointC.supA;
+	contactPoint.supB = u * face.pointA.supB + v * face.pointB.supB + w * face.pointC.supB;
+
+	// 接触点
+	contactPoint.point = (contactPoint.supA + contactPoint.supB) * 0.5f;
+
+	return contactPoint;
+
+}
+

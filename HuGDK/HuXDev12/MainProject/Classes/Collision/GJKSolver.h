@@ -43,5 +43,5 @@ public:
 private:
 
 	EPASolver m_epaSolver;
-	float m_contactMargin = 0.15;
+	float m_contactMargin = 0.5;
 };

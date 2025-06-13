@@ -17,10 +17,7 @@ public:
         //Œ`‚É‰‚¶‚½’¸“_‚ğİ’è‚µ‚Ü‚·B
         m_localVertices.assign(m_primitiveVertices.begin(), m_primitiveVertices.end());
 
-
-
         ComputeInertiaTensor();
-
 	}
 
     SimpleMath::Vector3 ComputeCenter() const  override;

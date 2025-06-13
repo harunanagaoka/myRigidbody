@@ -40,14 +40,24 @@ void RigidbodyManager::CheckCollision() {
 }
 
 void RigidbodyManager::UpdateAll() {
+			PhysicsUpdate();
+			//pair.second->Update();
+}
 
-	for (auto& pair : m_rigidbodyMap) {
+void RigidbodyManager::PhysicsUpdate() {
+	const int Step = 4;
+	const float maxDeltaTime = 0.033f;
+	float dt = DXTK->Time.deltaTime / Step;
+	dt = dt = std::min(dt, maxDeltaTime);
 
-		if (pair.second != nullptr) {
-			pair.second->Update();
+	for (int i = 0; i < Step; ++i) {
+		for (auto& pair : m_rigidbodyMap) {
+			if (pair.second != nullptr) {
+				pair.second->Update(dt);
+			}
 		}
+		CheckCollision(); // © ‘S„‘Ì‚ª“®‚¢‚½‚ ‚Æ‚ÉˆêŠ‡”»’èI
 	}
 
-	CheckCollision();
 
 }
