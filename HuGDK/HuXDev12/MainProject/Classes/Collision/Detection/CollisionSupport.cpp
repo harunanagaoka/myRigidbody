@@ -38,7 +38,7 @@ namespace CollisionSupport {
 	/// <param name="vertices_A">図形Aの頂点データ</param>
 	/// <param name="vertices_B">図形Bの頂点データ</param>
 	/// <param name="direction">探索方向</param>
-	PointInfo Support(const vector<SimpleMath::Vector3>& vertices_A, const vector<SimpleMath::Vector3>& vertices_B, SimpleMath::Vector3& direction) {
+	PointInfo Support(const vector<SimpleMath::Vector3>& vertices_A, const vector<SimpleMath::Vector3>& vertices_B,SimpleMath::Vector3& direction) {
 		PointInfo pointInfo;
 
 		size_t i = IndexOfFurthestPoint(vertices_A, direction);
@@ -48,7 +48,6 @@ namespace CollisionSupport {
 		pointInfo.supB = vertices_B[j];
 
 		pointInfo.point = pointInfo.supA - pointInfo.supB;
-		//m_polytope.push_back(pointInfo);
 
 		return pointInfo;
 	}
@@ -64,6 +63,11 @@ namespace CollisionSupport {
 		return result.second;
 	}
 
+	/// <summary>
+	/// シンプレックスが退化した場合、あらゆる方向に探索し、シンプレックスが原点を含むか確認します。
+	/// </summary>
+	/// <param name="simplex">シンプレックスの頂点</param>
+	/// <param name="index">シンプレックスの現在の成長具合</param>
 	bool TryEncloseOrigin(const vector<SimpleMath::Vector3>& vertices_A, const vector<SimpleMath::Vector3>& vertices_B, array<PointInfo, g_maxSimplexSize>& simplex, size_t& index) {
 		SimpleMath::Vector3 UnitX = SimpleMath::Vector3::Right;
 		SimpleMath::Vector3 UnitY = SimpleMath::Vector3::Up;
@@ -188,29 +192,10 @@ namespace CollisionSupport {
 		return false;
 	}
 
-
 	/// <summary>
-	/// EPA用
+	/// 4点の座標が構成する四面体に原点が含まれているかどうかを判定します。
 	/// </summary>
-	bool IsValidTetrahedron(SimpleMath::Vector3 pointA, SimpleMath::Vector3 pointB, SimpleMath::Vector3 pointC, SimpleMath::Vector3 pointD) {
-		const SimpleMath::Vector3 AB = pointB - pointA;
-		const SimpleMath::Vector3 AC = pointC - pointA;
-		const SimpleMath::Vector3 AD = pointD - pointA;
-
-		//四面体の体積
-		float volume = abs(AB.Dot(AC.Cross(AD))) / 6.0f;
-
-		if (volume > 0)
-		{
-			const SimpleMath::Vector3 P = SimpleMath::Vector3::Zero;
-
-			return true;
-		}
-
-		return false;
-	}
-
-	bool CollisionSupport::IsEncloseOrigin(SimpleMath::Vector3 pointA, SimpleMath::Vector3 pointB, SimpleMath::Vector3 pointC, SimpleMath::Vector3 pointD) {
+	bool CollisionSupport::IsEncloseOrigin(const SimpleMath::Vector3 pointA, const SimpleMath::Vector3 pointB, const SimpleMath::Vector3 pointC, const SimpleMath::Vector3 pointD) {
 		auto SignTest = [](const SimpleMath::Vector3& p1, const SimpleMath::Vector3& p2, const SimpleMath::Vector3& p3, const SimpleMath::Vector3& testPoint) {
 			SimpleMath::Vector3 n = (p2 - p1).Cross(p3 - p1);
 			return n.Dot(testPoint - p1) >= 0.0f;
@@ -222,22 +207,13 @@ namespace CollisionSupport {
 		bool s4 = SignTest(pointB, pointD, pointC, SimpleMath::Vector3::Zero);
 
 		return (s1 == s2) && (s2 == s3) && (s3 == s4);
-
-
-		//SimpleMath::Vector3 nABC = (pointB - pointA).Cross(pointC - pointA);
-		//SimpleMath::Vector3 nACD = (pointC - pointA).Cross(pointD - pointA);
-		//SimpleMath::Vector3 nADB = (pointD - pointA).Cross(pointB - pointA);
-		//SimpleMath::Vector3 nCBD = (pointB - pointC).Cross(pointD - pointC);
-
-		//bool insideABC = nABC.Dot(-pointA) > 0;
-		//bool insideACD = nACD.Dot(-pointA) > 0;
-		//bool insideADB = nADB.Dot(-pointA) > 0;
-		//bool insideCBD = nCBD.Dot(-pointC) > 0;
-
-		//return insideABC && insideACD && insideADB && insideCBD;
 	}
 
-	void GenerateFrictionBasis(SimpleMath::Vector3 normal, SimpleMath::Vector3& tangent1, SimpleMath::Vector3& tangent2) {
+	/// <summary>
+	/// 摩擦の方向を算出します。
+	/// </summary>
+	/// <param name="normal">接触法線</param>
+	void GenerateFrictionBasis(const SimpleMath::Vector3 normal, SimpleMath::Vector3& tangent1, SimpleMath::Vector3& tangent2) {
 
 		if (abs(normal.x) > abs(normal.z)) {
 			// normalと垂直なベクトルを作る（x軸成分が大きいとき）

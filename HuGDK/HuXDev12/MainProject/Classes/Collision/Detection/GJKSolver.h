@@ -4,9 +4,9 @@
 
 #pragma once
 #include "CollisionSupport.h"
-#include "Collider/PhysicsCollider.h"
-#include "..\Rigidbody.h"
-#include "..\Resistry\PhysicsTypes.h"
+#include "..\Collider/PhysicsCollider.h"
+#include "..\..\Core/Rigidbody.h"
+#include "..\..\Resistry\PhysicsTypes.h"
 #include "EPASolver.h"
 #include <array>
 #include <unordered_set>
@@ -17,8 +17,6 @@ class GJKSolver {
 public:
 
 	bool GJK(const PhysicsCollider* collider_A, const PhysicsCollider* collider_B, ContactInfo& info);
-
-	bool SimplexHitTest(array<SimpleMath::Vector3, g_maxSimplexSize>& simplex, size_t& index);
 
 	bool ComputeClosestPoint(array<PointInfo, g_maxSimplexSize>& simplex, size_t& index, PointInfo& closestPointInfo);
 
@@ -44,4 +42,8 @@ private:
 
 	EPASolver m_epaSolver;
 	float m_contactMargin = 0.5;
+
+	const int m_gjkMaxIter = 1000;
+	const float m_closestPointEpsilon = 3;
+	const float m_penetrationEpsilon = 0.5;
 };

@@ -4,11 +4,12 @@
 
 #pragma once
 
-#include "..\..\Base\pch.h"
-#include "..\..\Base\dxtk.h"
-#include "Collider/PhysicsCollider.h"
+#include "..\..\..\Base\pch.h"
+#include "..\..\..\Base\dxtk.h"
+#include "..\Collider/PhysicsCollider.h"
 #include "CollisionSupport.h"
 #include <array>
+#include <unordered_set>
 
 using namespace std;
 using namespace CollisionSupport;
@@ -16,13 +17,34 @@ using namespace CollisionSupport;
 class EPASolver {
 public:
 
+	//面情報を保存する構造体
+	struct FaceInfo {
+		SimpleMath::Vector3 normal;//法線
+		float distanceToOrigin;
+		PointInfo pointA, pointB, pointC;//面の頂点
+		FaceInfo* neighbors[3] = { nullptr,nullptr,nullptr };//隣接する面
+		FaceInfo* prev = nullptr;
+		FaceInfo* next = nullptr;
+		unsigned char neighborEdges[3];//隣接面のどの辺に接しているか
+		unsigned char visitedPass;
+		unsigned char pass;
+	};
+
+	//面の数等を保存しておく構造体
+	struct Horizon {
+		FaceInfo* firstFace = nullptr;
+		FaceInfo* currentFace = nullptr;
+		unsigned int numberOfFaces = 0;
+	};
+
+	EPASolver() = default;
 	~EPASolver() {
 		for (FaceInfo* face : m_FacesInfo) {
 			delete face;
 		}
 		m_FacesInfo.clear();
-
 	}
+
 	bool EPA(const PhysicsCollider* collider_A, const PhysicsCollider* collider_B, array<PointInfo, g_maxSimplexSize>& simplex,size_t& index, ContactInfo& info);
 
 	bool EncloseOrigin(array<PointInfo, g_maxSimplexSize>& simplex, size_t& index);
@@ -33,26 +55,16 @@ public:
 
 	void BindFaces(FaceInfo* faceA, unsigned char edgeA, FaceInfo* faceB, unsigned char edgeB);
 
-	FaceInfo* AddFace(PointInfo& pointA, PointInfo& pointB, PointInfo& pointC);
+	EPASolver::FaceInfo* AddFace(PointInfo& pointA, PointInfo& pointB, PointInfo& pointC);
 
 	void RemoveFace(FaceInfo* target);
 
 	void InitNewFace(FaceInfo* newFace, PointInfo& pointA, PointInfo& pointB, PointInfo& pointC);
 
-	FaceInfo* FindBest();
+	EPASolver::FaceInfo* FindBest();
 
 	PointInfo GetContactPoint(FaceInfo face);
 
-	//	void ComputeBarycentric(FaceInfo minFace, SimpleMath::Vector3& contactPointA, SimpleMath::Vector3& contactPointB);
-//
-//	void ComputeTangentBasis(const SimpleMath::Vector3& normal, SimpleMath::Vector3& tangent1, SimpleMath::Vector3& tangent2);
-//
-//	void AddIfUniqueEdge(std::vector<std::pair<size_t, size_t>>& edges,
-//		const std::vector<size_t>& faces, size_t a, size_t b);
-//
-//	size_t GetFaceNormals(const std::vector<SimpleMath::Vector3>& polytope,
-//		const std::vector<size_t>& faces, vector<FaceInfo>& facesInfo);
-//
 private:
 
 	//最後にerase

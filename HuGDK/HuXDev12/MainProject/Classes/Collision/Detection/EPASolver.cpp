@@ -1,24 +1,25 @@
 
 #include "EPASolver.h"
 
-/*edge 0 = A→B
-
-edge 1 = B→C
-
-edge 2 = C→A*/
-
 /// <summary>
-/// gjkから頂点情報を受け取りコライダー同士の衝突深度を計算し、ContactInfoに保存します。
+/// GJKSolverから頂点情報を受け取りコライダー同士の衝突深度を計算し、ContactInfoに保存します。
 /// </summary>
 bool EPASolver::EPA(const PhysicsCollider* collider_A, const PhysicsCollider* collider_B, array<PointInfo, g_maxSimplexSize>& simplex, size_t& index, ContactInfo& info) {
+
+	unordered_set<SimpleMath::Vector3, Vector3Hash, Vector3Equal> visitedPoints;
 
     m_vertices_1 = collider_A->GetWorldVertices();
 	m_vertices_2 = collider_B->GetWorldVertices();
 
-	if (index > 0 && EncloseOrigin(simplex,index)) {
+	if (index > 0 && EncloseOrigin(simplex,index)) {//シンプレックスが4点に満たなかった場合、4点に育てます。
 
 		m_polytope.clear();
 		m_polytope.insert(m_polytope.end(), simplex.begin(), simplex.end());
+
+		for (int i = 0; i < m_polytope.size(); i++) {
+			//重複チェック用コンテナ初期化
+			CheckDuplicationAndSet(visitedPoints, m_polytope[i].point);
+		}
 
 		//頂点の順番を右手系に整える
 		const SimpleMath::Vector3& DA = m_polytope[3].point - m_polytope[0].point;
@@ -30,8 +31,8 @@ bool EPASolver::EPA(const PhysicsCollider* collider_A, const PhysicsCollider* co
 			swap(m_polytope[0], m_polytope[1]);
 		}
 
-
-		InitPolytope();//MakePolytopeと分ける
+		// 初期ポリトープ生成処理
+		InitPolytope();
 
 		FaceInfo* best = FindBest();
 		FaceInfo currentFace = *best;
@@ -51,16 +52,24 @@ bool EPASolver::EPA(const PhysicsCollider* collider_A, const PhysicsCollider* co
 			Horizon horizon;
 			bool success = true;
 			best->pass = ++pass;
+
+			//一番原点に近い面の法線方向にサポート点を探索します。
 			nextPoint = Support(m_vertices_1, m_vertices_2, best->normal);
+
+			if (CheckDuplicationAndSet(visitedPoints, nextPoint.point)) {//重複チェック
+				break;
+			}
+
 			float distance = best->normal.Dot(nextPoint.point) - best->distanceToOrigin;
-			if (distance > 0.1) {
+			float distanceEpsilon = 0.1;
+			if (distance > distanceEpsilon) {
 
 				//ポリトープ拡張
 				for (int j = 0; (j < 3) && success; j++) {
 					success = ExpandPolytope(pass,nextPoint,best->neighbors[j],best->neighborEdges[j],horizon);
-					//if (!success) {
-					//	break;
-					//}
+					if (!success) {
+						break;
+					}
 				}
 
 				if (success && horizon.numberOfFaces >= 3) {
@@ -70,13 +79,13 @@ bool EPASolver::EPA(const PhysicsCollider* collider_A, const PhysicsCollider* co
 					currentFace = *best;
 				}
 				else {
-					//m_status = eStatus::Failed;
-					//m_status = eStatus::InvalidHull;?だった
+					// Failed;
+					// 個別の処理を追加予定
 					break;
 				}
 			}
 			else {
-				//m_status = eStatus::AccuraryReached;
+				// AccuraryReached; 原点に近づき切った
 				break;
 			}
 		}
@@ -87,7 +96,7 @@ bool EPASolver::EPA(const PhysicsCollider* collider_A, const PhysicsCollider* co
 		PointInfo contactPoint = GetContactPoint(currentFace);
 		info.contactPointA = contactPoint.supA;
 		info.contactPointB = contactPoint.supB;
-		GenerateFrictionBasis(info.normal, info.tangent1, info.tangent2);
+		CollisionSupport::GenerateFrictionBasis(info.normal, info.tangent1, info.tangent2);
 
 		for (FaceInfo* f : m_FacesInfo) {
 			delete f;
@@ -195,7 +204,7 @@ bool EPASolver::EncloseOrigin(array<PointInfo, g_maxSimplexSize>& simplex, size_
 			B = simplex[1].point;
 			C = simplex[0].point;
 
-			SimpleMath::Vector3 normal = (B - A).Cross(C - A);//右手系ベクトル
+			SimpleMath::Vector3 normal = (B - A).Cross(C - A);
 
 			if (normal.LengthSquared() > 0) {
 
@@ -244,17 +253,22 @@ bool EPASolver::EncloseOrigin(array<PointInfo, g_maxSimplexSize>& simplex, size_
 	return false;
 }
 
+/// <summary>
+/// 新しい点を使いポリトープを拡張します。
+/// </summary>
 bool EPASolver::ExpandPolytope(unsigned char pass, PointInfo nextPoint, FaceInfo* face, unsigned int Index, Horizon& horizon) {
-	static const unsigned int i1m3[] = { 1, 2, 0 };
-	static const unsigned int i2m3[] = { 2, 0, 1 };//三角形用インデックス
+	static const unsigned int plus1[] = { 1, 2, 0 };
+	static const unsigned int plus2[] = { 2, 0, 1 };//面作成用インデックス
 	
+	//m_bestFaceに隣接する3つの面に対して新しい点から見える面を消す
+    //その境界を新しい点とつなげ再構築
 	if (face->pass != pass) {
-
-		const unsigned int Index1 = i1m3[Index];
+		
+		const unsigned int Index1 = plus1[Index];
 
 		if (face->normal.Dot(nextPoint.point) - face->distanceToOrigin < 0) {
 			FaceInfo* newFace = AddFace(face->pointB, face->pointA, nextPoint);
-			//FaceInfo* newFace = AddFace(face->pointA, nextPoint, face->pointB);?
+
 
 			BindFaces(newFace, 0, face, Index);
 
@@ -268,12 +282,11 @@ bool EPASolver::ExpandPolytope(unsigned char pass, PointInfo nextPoint, FaceInfo
 			horizon.currentFace = newFace;
 			++horizon.numberOfFaces;
 
-			//face->pass = pass;
 			return true;
 		}
 		else {
 			
-			const unsigned int Index2 = i2m3[Index];
+			const unsigned int Index2 = plus2[Index];
 			face->pass = pass;
 			if (ExpandPolytope(pass, nextPoint, face->neighbors[Index1], face->neighborEdges[Index1], horizon) &&
 				ExpandPolytope(pass, nextPoint, face->neighbors[Index2], face->neighborEdges[Index2], horizon)) {
@@ -282,12 +295,9 @@ bool EPASolver::ExpandPolytope(unsigned char pass, PointInfo nextPoint, FaceInfo
 				return true;
 			}
 		}
-		//m_bestFaceに隣接する3つの面に対して新しい点から見える面を消す
-		//その境界を新しい点とつなげ再構築
 	}
 	return false;
 }
-
 
 /// <summary>
 /// 初期ポリトープから面情報を作ります。
@@ -301,15 +311,8 @@ void EPASolver::InitPolytope() {
 	0, 2, 3    // 面3
 	};
 
-	//vector<size_t> faces = {
-	//0, 1, 2,
-	//0, 1, 3,
-	//1, 2, 3,
-	//2, 0, 3
-	//};
-
-
 	for (int i = 0; i < faces.size(); i += 3) {
+		//面を作成してリストに保存
 		FaceInfo* newface = new FaceInfo();
 
 		newface->pointA = m_polytope[faces[i]];
@@ -342,7 +345,10 @@ void EPASolver::BindFaces(FaceInfo* faceA, unsigned char edgeA, FaceInfo* faceB,
 	faceB->neighborEdges[edgeB] = edgeA;
 }
 
-FaceInfo* EPASolver::AddFace(PointInfo& pointA, PointInfo& pointB, PointInfo& pointC) {
+/// <summary>
+/// 新しい面を作成し初期化を行います。
+/// </summary>
+EPASolver::FaceInfo* EPASolver::AddFace(PointInfo& pointA, PointInfo& pointB, PointInfo& pointC) {
 
 	FaceInfo* newFace = new FaceInfo();
 	InitNewFace(newFace, pointA, pointB, pointC);
@@ -364,14 +370,16 @@ FaceInfo* EPASolver::AddFace(PointInfo& pointA, PointInfo& pointB, PointInfo& po
 	return newFace;
 }
 
-//新しい面が三角形になってるかチェックする処理追加
+/// <summary>
+/// 頂点情報から受け取ったFaceInfoの初期化を行い、リストに保存します。
+/// </summary>
 void EPASolver::InitNewFace(FaceInfo* newFace, PointInfo& pointA, PointInfo& pointB, PointInfo& pointC) {
 	newFace->pointA = pointA;
 	newFace->pointB = pointB;
 	newFace->pointC = pointC;
 
-	SimpleMath::Vector3 ab = newFace->pointB.point - newFace->pointA.point;
-	SimpleMath::Vector3 ac = newFace->pointC.point - newFace->pointA.point;
+	SimpleMath::Vector3 ab = newFace->pointB.point - newFace->pointA.point;	ab.Normalize();
+	SimpleMath::Vector3 ac = newFace->pointC.point - newFace->pointA.point;	ac.Normalize();
 	newFace->normal = ab.Cross(ac);
 	newFace->normal.Normalize();
 
@@ -386,19 +394,22 @@ void EPASolver::InitNewFace(FaceInfo* newFace, PointInfo& pointA, PointInfo& poi
 
 }
 
+/// <summary>
+/// 指定した面をリストから削除します。
+/// </summary>
+/// <param name="target"></param>
 void EPASolver::RemoveFace(FaceInfo* target) {
 	auto it = std::remove(m_FacesInfo.begin(), m_FacesInfo.end(), target);
 	if (it != m_FacesInfo.end()){
 		m_FacesInfo.erase(it, m_FacesInfo.end());
 	}
-		
 }
 
 /// <summary>
-/// 最も原点に近い面を算出します。
+/// リストから最も原点に近い面を算出します。
 /// </summary>
 /// <returns>最も原点に近い面のポインタ</returns>
-FaceInfo* EPASolver::FindBest() {
+EPASolver::FaceInfo* EPASolver::FindBest() {
 
 	FaceInfo* bestf = nullptr;
 	float bestd = FLT_MAX;
@@ -413,6 +424,10 @@ FaceInfo* EPASolver::FindBest() {
 	return bestf;
 }
 
+/// <summary>
+/// 面情報から接触点を求めます。
+/// </summary>
+/// <returns>接触点の情報</returns>
 PointInfo EPASolver::GetContactPoint(FaceInfo face) {
 
 	PointInfo contactPoint;
@@ -421,7 +436,6 @@ PointInfo EPASolver::GetContactPoint(FaceInfo face) {
 	const SimpleMath::Vector3& B = face.pointB.point;
 	const SimpleMath::Vector3& C = face.pointC.point;
 
-	// 原点を三角形ABCに射影したバリセンター係数を求めるケロ
 	SimpleMath::Vector3 AB = B - A;
 	SimpleMath::Vector3 AC = C - A;
 	SimpleMath::Vector3 AP = -A; // 原点 - A
@@ -437,7 +451,7 @@ PointInfo EPASolver::GetContactPoint(FaceInfo face) {
 	float w = (d00 * d21 - d01 * d20) / denom;
 	float u = 1.0f - v - w;
 
-	// それぞれの形状の補間点を求める
+	// それぞれの形状の補間点
 	contactPoint.supA = u * face.pointA.supA + v * face.pointB.supA + w * face.pointC.supA;
 	contactPoint.supB = u * face.pointA.supB + v * face.pointB.supB + w * face.pointC.supB;
 

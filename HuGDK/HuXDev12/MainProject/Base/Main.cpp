@@ -101,6 +101,8 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
             return 1;
 
         ShowWindow(hwnd, nCmdShow);
+
+        SetWindowTextW(hwnd, L"Physics Demo - AÉLÅ[Ç≈AddForce");
         // TODO: Change nCmdShow to SW_SHOWMAXIMIZED to default to fullscreen.
 #else
         HWND hwnd = CreateWindowExW(
