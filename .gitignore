@@ -43,3 +43,12 @@ HuGDK/HuXDev12/MainProject/Scenes/新規 テキスト ドキュメント.txt
 HuGDK/HuXDev12/MainProject/Classes/DirectX/新規 テキスト ドキュメント.txt
 HuGDK/HuXDev12/MainProject/Classes/CreateResources/(クラスひな形）.cpp
 HuGDK/HuXDev12/MainProject/Classes/CreateResources/(クラスひな形）.h
+HuGDK/HuXDev12/Physics Demo.sln
+HuGDK/HuXDev12/External
+HuGDK/HuXDev12/MainProject.vcxproj
+HuGDK/HuXDev12/MainProject.vcxproj.filters
+HuGDK/HuXDev12/MainProject.vcxproj.user
+HuGDK/HuXDev12/packages.config
+HuGDK/HuXDev12/Resource
+HuGDK/HuXDev12/MainProject/Scenes/DontDestroyOnLoad.h
+HuGDK/HuXDev12/MainProject/Scenes/TemplateScene
