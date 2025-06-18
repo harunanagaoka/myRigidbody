@@ -4,10 +4,17 @@
 
 #include "RigidbodyManager.h"
 
+/// <summary>
+/// 新しいRigidbodyを生成、管理リストに追加します。
+/// </summary>
+/// <param name="type">コライダーの形状</param>
+/// <param name="position">描画、当たり判定のポジション</param>
+/// <returns>生成したRigidbodyのポインタ</returns>
 Rigidbody* RigidbodyManager::AddRigidbody(ColliderType type, SimpleMath::Vector3 position) {
 	static int id = 0;
 	
 	PhysicsCollider* collider = m_colliderFactory.CreateCollider(type);
+
 	Rigidbody* rb = new Rigidbody(id,type, collider,position);
 	m_rigidbodyMap[id] = rb;
 	id++;
@@ -15,39 +22,70 @@ Rigidbody* RigidbodyManager::AddRigidbody(ColliderType type, SimpleMath::Vector3
 	return rb;
 }
 
+/// <summary>
+/// 全てのRigidbodyどうしの衝突検出を行います。
+/// 衝突していた場合、衝突応答を行います。
+/// </summary>
 void RigidbodyManager::CheckCollision() {
 
-	//重複なし総当たり
+	// 重複なし総当たり
 	for (auto it1 = m_rigidbodyMap.begin(); it1 != m_rigidbodyMap.end(); ++it1) {
 		auto it2 = it1;
 		++it2; 
 
 		for (; it2 != m_rigidbodyMap.end(); ++it2) {
 
-			Rigidbody* rb1 = it1->second;
-			Rigidbody* rb2 = it2->second;
+			Rigidbody* rbA = it1->second;
+			Rigidbody* rbB = it2->second;
 
-			ContactInfo info = m_detector.DetectCollision(rb1, rb2);
+			ContactInfo info = m_detector.DetectCollision(rbA, rbB);
 			
-			if (info.hasValue) {/* hasValue -> 衝突あり */
-				rb1->ImpactResponse();
-				rb2->ImpactResponse();
+			if (info.hasValue) {
+				/* hasValue -> 衝突あり */
+				rbA->ImpactResponse(rbB, info, true);
+				rbB->ImpactResponse(rbA,info,false);
 			}
-
 		}
 	}
-
 }
 
-void RigidbodyManager::UpdateAll() {
+/// <summary>
+/// PhysicsUpdate、AddForceを呼び出します。
+/// </summary>
+void RigidbodyManager::Update() {
 
-	for (auto& pair : m_rigidbodyMap) {
+	PhysicsUpdate();
 
-		if (pair.second != nullptr) {
-			pair.second->Update();
+	HandleDemoInput();
+}
+
+/// <summary>
+/// 全てのRigidbodyのUpdateと衝突判定を行います。
+/// </summary>
+void RigidbodyManager::PhysicsUpdate() {
+
+	float dt = DXTK->Time.deltaTime / m_step;
+
+	dt = std::min(dt, m_maxDeltaTime);
+
+	for (int i = 0; i < m_step; ++i) {
+		for (auto& pair : m_rigidbodyMap) {
+			if (pair.second != nullptr) {
+
+				pair.second->Update(dt); // 各剛体のUpdate()
+			}
 		}
+
+		CheckCollision(); // 衝突判定
 	}
+}
 
-	CheckCollision();
+/// <summary>
+/// キー入力に応じてAddForceを呼びます。
+/// </summary>
+void RigidbodyManager::HandleDemoInput() {
 
+	if (InputSystem.Keyboard.wasPressedThisFrame.A) {
+		m_rigidbodyMap[m_boxIDDemo]->AddForce(m_boxJumpHeightDemo);
+	}
 }

@@ -9,9 +9,9 @@
 #include "Classes/CreateResources/PipelineManager.h"
 #include "Classes/CreateResources/CameraManager.h"
 #include "Classes/CreateResources/EffectManager.h"
-#include "Classes/RigidbodyManager.h"
-#include "Classes/Rigidbody.h"
 #include "Classes/Simulation/SimulationObject.h"
+#include "Classes/RigidbodyManager.h"
+#include "Classes/Core/Rigidbody.h"
 #include "Classes/Resistry/PhysicsTypes.h"
 
 using Microsoft::WRL::ComPtr;
@@ -30,7 +30,6 @@ public:
 	MainScene(MainScene const&) = delete;
 	MainScene& operator= (MainScene const&) = delete;
 
-	// These are the functions you will implement.
 	void Start() override;
 
 	void CreateDeviceDependentResources() override;
@@ -48,20 +47,15 @@ public:
 	void Render() override;
 
 private:
+	// 描画関連
 	ShaderManager m_shader;
 	PipelineManager m_pipeline;
 	CameraManager m_camera;
 	EffectManager m_effectManager;
 
+	// 物理関連
 	RigidbodyManager m_rigidbodyManager;
+	SimulationObject m_stage;
+	SimulationObject m_cube;
 
-	SimulationObject m_obj;
-
-	SimulationObject m_objB;
-
-	float frameTimer = 0.0f;
-	int frameCount = 0;
-	float fps = 0.0f;
-
-	bool m_aabbDirty = false;//trueの場合のみ更新
 };

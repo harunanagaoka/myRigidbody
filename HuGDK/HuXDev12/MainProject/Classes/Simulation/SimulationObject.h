@@ -6,7 +6,12 @@
 
 #include "..\..\Base\pch.h"
 #include "..\..\Base\dxtk.h"
-#include "..\Rigidbody.h"
+#include "..\Core/Rigidbody.h"
+
+enum class ShapeName {
+	Tetrahedron,
+	Box
+};
 
 class SimulationObject  {
 public:
@@ -15,24 +20,18 @@ public:
 
 	~SimulationObject() = default;
 
-	void SetShape(){
-		m_shape = GeometricPrimitive::CreateTetrahedron();//テスト用四面体
-	}
+	void SetShape(ShapeName shape);
 
 	void SetRigidbody(Rigidbody* rb) { m_rigidbody = rb; }
+
+	void SetSize(SimpleMath::Vector3 size);
 
 	void Render(DirectXTK::BasicEffect& effect);
 
 private:
 	DirectXTK::GeometricPrimitive m_shape;
-	Rigidbody* m_rigidbody;//deleteは管理クラスで一括で行う
+
+	//Rigidbodyのdeleteは管理クラスで一括で行っています。
+	Rigidbody* m_rigidbody;
+	SimpleMath::Vector3 m_size = SimpleMath::Vector3::One;
 };
-
-
-
-
-/*
-//enum class ObjectType {種類増えてきたら使う
-//	Tetrahedron
-//
-//};*/

@@ -6,5 +6,6 @@
 
 enum class ColliderType {
 	Tetrahedron,
+	Box,
 	Error
 };
