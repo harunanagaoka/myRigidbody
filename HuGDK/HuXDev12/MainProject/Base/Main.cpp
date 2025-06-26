@@ -24,20 +24,6 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 // Entry point
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
-
-#if defined(_DEBUG)
-    {
-#include <wrl/client.h>
-        using Microsoft::WRL::ComPtr;
-#include <windows.h>
-        ComPtr<ID3D12Debug> debugController;
-        if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
-        {
-            debugController->EnableDebugLayer();
-            OutputDebugStringA(" D3D12 デバッグレイヤー 有効化");
-        }
-    }
-#endif
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -101,8 +87,6 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
             return 1;
 
         ShowWindow(hwnd, nCmdShow);
-
-        SetWindowTextW(hwnd, L"Physics Demo - AキーでAddForce");
         // TODO: Change nCmdShow to SW_SHOWMAXIMIZED to default to fullscreen.
 #else
         HWND hwnd = CreateWindowExW(

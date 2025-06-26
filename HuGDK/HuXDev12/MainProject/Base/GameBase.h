@@ -4,15 +4,15 @@
 
 #pragma once
 
-#define GAME_TITLE      L"Physics Demo - AÉLÅ[Ç≈AddForce"
+#define GAME_TITLE      L"HuGame"
 
 #define DXTK_FULLSCREEN 0   // 1...fullscreen mode
 #define DXTK_KEYBOARD   1   // 1...use Keyboard
-#define DXTK_MOUSE      1   // 1...use Mouse
+#define DXTK_MOUSE      0   // 1...use Mouse
 #define DXTK_GAMEPAD    1   // 1...use GamePad
 
-#define DXTK_sRGB       0   // 1...sRGB / 0...RGB
-#define DXTK_DEBUGLAYER 1   // 1...use DebugLayer(Forced sRGB is disabled)
+#define DXTK_sRGB       1   // 1...sRGB / 0...RGB
+#define DXTK_DEBUGLAYER 0   // 1...use DebugLayer(Forced sRGB is disabled)
 #define DXTK_MULTIGPU   0   // 1...use Heterogeneous Multiadapter
 //#define DXTK_AMP      0   // 1...use AMP
 

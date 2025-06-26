@@ -1,0 +1,255 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Base">
+      <UniqueIdentifier>{47974e81-ff42-4d0c-8227-fa99f8c69fd2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{29c1d6e3-875e-4d01-a01d-0974e170e5c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scenes">
+      <UniqueIdentifier>{d7d56ad3-60f4-40ad-b499-8133f5f75990}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Base\DX">
+      <UniqueIdentifier>{57861352-b6ac-419f-9d1f-561d5941eabd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Base\Gamepad">
+      <UniqueIdentifier>{dd2f8020-b24e-404b-ba9d-a2f2061ada4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Base\Toolkit">
+      <UniqueIdentifier>{df0d2a90-74be-4d38-a257-3fe37d2e7015}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes">
+      <UniqueIdentifier>{8ee5c0e9-5042-4941-bf9c-6e3b9c639701}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\CreateResources">
+      <UniqueIdentifier>{4a3d28f7-a4c2-46ec-a032-505f711b2e95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Collision">
+      <UniqueIdentifier>{3e33dc0d-c4d4-447b-93ed-059fbbb4756d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Core">
+      <UniqueIdentifier>{c1c2ef3a-70a8-4d02-9552-f720e6050f67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Resistry">
+      <UniqueIdentifier>{f83a96e2-1755-48d0-8da1-84bef45a5bb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Simulation">
+      <UniqueIdentifier>{47d59519-7b57-46d5-96ab-9c374ea43059}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Collision\Collider">
+      <UniqueIdentifier>{5404ee72-91d8-4b34-843d-dd342fbe2aae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\Collision\Detection">
+      <UniqueIdentifier>{b3769d66-994a-4485-9037-338090aaff31}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Base\pch.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\GameBase.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\DX\StepTimer.h">
+      <Filter>Base\DX</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\DX\d3dx12.h">
+      <Filter>Base\DX</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\DontDestroyOnLoad.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\MainScene.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\Scene.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\SceneFactory.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\dxtk.h">
+      <Filter>Base\Toolkit</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\wiGamepad\CommonInclude.h">
+      <Filter>Base\Gamepad</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\wiGamepad\wiColor.h">
+      <Filter>Base\Gamepad</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\wiGamepad\wiGamepad.h">
+      <Filter>Base\Gamepad</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\wiGamepad\wiInput.h">
+      <Filter>Base\Gamepad</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\wiGamepad\wiMath.h">
+      <Filter>Base\Gamepad</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\wiGamepad\wiPlatform.h">
+      <Filter>Base\Gamepad</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\wiGamepad\wiRawGamepad.h">
+      <Filter>Base\Gamepad</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\wiGamepad\wiVector.h">
+      <Filter>Base\Gamepad</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\wiGamepad\wiXInput.h">
+      <Filter>Base\Gamepad</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\Toolkits\DXTKCamera.h">
+      <Filter>Base\Toolkit</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\Toolkits\DXTKHelpers.h">
+      <Filter>Base\Toolkit</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\Toolkits\DXTKMathematics.h">
+      <Filter>Base\Toolkit</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\Toolkits\InputSystem.h">
+      <Filter>Base\Toolkit</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\Collider\BoxCollider.h">
+      <Filter>Classes\Collision\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\Collider\PhysicsCollider.h">
+      <Filter>Classes\Collision\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\Collider\PhysicsColliderFactory.h">
+      <Filter>Classes\Collision\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\Collider\TetrahedronCollider.h">
+      <Filter>Classes\Collision\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\Detection\CollisionDetection.h">
+      <Filter>Classes\Collision\Detection</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\Detection\CollisionSupport.h">
+      <Filter>Classes\Collision\Detection</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\Detection\EPASolver.h">
+      <Filter>Classes\Collision\Detection</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Collision\Detection\GJKSolver.h">
+      <Filter>Classes\Collision\Detection</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Core\Rigidbody.h">
+      <Filter>Classes\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Core\Transform.h">
+      <Filter>Classes\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\CreateResources\CameraManager.h">
+      <Filter>Classes\CreateResources</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\CreateResources\EffectManager.h">
+      <Filter>Classes\CreateResources</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\CreateResources\PipelineManager.h">
+      <Filter>Classes\CreateResources</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\CreateResources\ShaderManager.h">
+      <Filter>Classes\CreateResources</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Resistry\PhysicsTypes.h">
+      <Filter>Classes\Resistry</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\Simulation\SimulationObject.h">
+      <Filter>Classes\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="Classes\RigidbodyManager.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Base\Main.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\pch.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\GameBase.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\MainScene.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\wiGamepad\wiGamepad.cpp">
+      <Filter>Base\Gamepad</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\wiGamepad\wiMath.cpp">
+      <Filter>Base\Gamepad</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\wiGamepad\wiRawGamepad.cpp">
+      <Filter>Base\Gamepad</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\wiGamepad\wiXInput.cpp">
+      <Filter>Base\Gamepad</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\Toolkits\DXTKCamera.cpp">
+      <Filter>Base\Toolkit</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Collision\Collider\BoxCollider.cpp">
+      <Filter>Classes\Collision\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Collision\Collider\TetrahedronCollider.cpp">
+      <Filter>Classes\Collision\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Collision\Detection\CollisionDetection.cpp">
+      <Filter>Classes\Collision\Detection</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Collision\Detection\CollisionSupport.cpp">
+      <Filter>Classes\Collision\Detection</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Collision\Detection\EPASolver.cpp">
+      <Filter>Classes\Collision\Detection</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Collision\Detection\GJKSolver.cpp">
+      <Filter>Classes\Collision\Detection</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Core\Rigidbody.cpp">
+      <Filter>Classes\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Core\Transform.cpp">
+      <Filter>Classes\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\CreateResources\CameraManager.cpp">
+      <Filter>Classes\CreateResources</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\CreateResources\EffectManager.cpp">
+      <Filter>Classes\CreateResources</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\CreateResources\PipelineManager.cpp">
+      <Filter>Classes\CreateResources</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\CreateResources\ShaderManager.cpp">
+      <Filter>Classes\CreateResources</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\Simulation\SimulationObject.cpp">
+      <Filter>Classes\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="Classes\RigidbodyManager.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resource\directx.ico">
+      <Filter>Resource</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource\resource.rc">
+      <Filter>Resource</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="Resource\settings.manifest">
+      <Filter>Resource</Filter>
+    </Manifest>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>

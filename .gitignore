@@ -49,10 +49,6 @@ HuGDK/HuXDev12/MainProject/External
 HuGDK/HuXDev12/MainProject/Scenes/TemplateScene/Direct3D9
 HuGDK/HuXDev12/MainProject/Scenes/TemplateScene
 HuGDK/HuXDev12/MainProject/Scenes/DontDestroyOnLoad.h
-HuGDK/HuXDev12/MainProject/MainProject.vcxproj
-HuGDK/HuXDev12/MainProject/MainProject.vcxproj.filters
-HuGDK/HuXDev12/MainProject/MainProject.vcxproj.user
-HuGDK/HuXDev12/Physics Demo.sln
 HuGDK/HuXDev12/MainProject/packages.config
 HuGDK/HuXDev12/MainProject/MainProject/x64
 HuGDK/HuXDev12/MainProject/packages

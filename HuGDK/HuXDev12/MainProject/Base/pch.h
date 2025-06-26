@@ -113,8 +113,6 @@
 //    #include <amp.h>
 //#endif
 
-
-
 namespace DX
 {
     inline void ThrowIfFailed(HRESULT hr)
@@ -138,8 +136,6 @@ namespace DX
         }
     }
 }
-
-
 
 #include "Toolkits\DXTKMathematics.h"
 #include "Toolkits\DXTKHelpers.h"
