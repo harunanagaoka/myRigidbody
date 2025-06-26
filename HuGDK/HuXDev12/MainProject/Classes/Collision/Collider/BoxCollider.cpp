@@ -1,7 +1,9 @@
 
 #include "BoxCollider.h"
 
-/*worldVertex更新後に呼ぶこと*/
+/// <summary>
+/// コライダーの中心点の座標を返します。
+/// </summary>
 SimpleMath::Vector3 BoxCollider::ComputeCenter() const {
 	SimpleMath::Vector3 center = SimpleMath::Vector3::Zero;
 
@@ -14,6 +16,9 @@ SimpleMath::Vector3 BoxCollider::ComputeCenter() const {
 	return center;
 }
 
+/// <summary>
+/// コライダーの大きさを変更します。
+/// </summary>
 void BoxCollider::SetSize(SimpleMath::Vector3 size) {
 	m_size = size; 
 
@@ -25,6 +30,9 @@ void BoxCollider::SetSize(SimpleMath::Vector3 size) {
 
 }
 
+/// <summary>
+/// 回転テンソルを形状に合わせて更新します。
+/// </summary>
 void BoxCollider::ComputeInertiaTensor() {
 	const float w = m_size.x;
 	const float h = m_size.y;

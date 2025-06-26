@@ -4,7 +4,9 @@
 
 #include "TetrahedronCollider.h"
 
-/*worldVertex更新後に呼ぶこと*/
+/// <summary>
+/// コライダーの中心点の座標を返します。
+/// </summary>
 SimpleMath::Vector3 TetrahedronCollider::ComputeCenter() const {
 
 	
@@ -19,9 +21,11 @@ SimpleMath::Vector3 TetrahedronCollider::ComputeCenter() const {
 	return center;
 }
 
+/// <summary>
+/// 回転テンソルを形状に合わせて更新します。
+/// </summary>
 void TetrahedronCollider::ComputeInertiaTensor() {
 
-	// 正四面体の慣性テンソル対角要素（原点中心、各軸対称）
 	float inertia = m_mass * 1.6f; //（近似値）
 
 	m_inertiaTensorLocal = SimpleMath::Matrix::Identity;

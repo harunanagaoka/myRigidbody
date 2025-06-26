@@ -6,7 +6,7 @@
 
 #include "..\..\Base\pch.h"
 #include "..\..\Base\dxtk.h"
-#include "..\Rigidbody.h"
+#include "..\Core/Rigidbody.h"
 
 enum class ShapeName {
 	Tetrahedron,
@@ -30,15 +30,8 @@ public:
 
 private:
 	DirectXTK::GeometricPrimitive m_shape;
-	Rigidbody* m_rigidbody;//deleteは管理クラスで一括で行う
+
+	//Rigidbodyのdeleteは管理クラスで一括で行っています。
+	Rigidbody* m_rigidbody;
 	SimpleMath::Vector3 m_size = SimpleMath::Vector3::One;
 };
-
-
-
-
-/*
-//enum class ObjectType {種類増えてきたら使う
-//	Tetrahedron
-//
-//};*/
